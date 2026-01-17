@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "562885198822",
+    "firebase_url": "https://mo8treb-default-rtdb.firebaseio.com",
+    "project_id": "mo8treb",
+    "storage_bucket": "mo8treb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:562885198822:android:f90a607f5edf95154a4c27",
+        "android_client_info": {
+          "package_name": "com.example.admin_motareb"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqPux1YLdX3_F9oacuH2-VGFc8LP5XhnE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:562885198822:android:07f8337b6091c02a4a4c27",
+        "android_client_info": {
+          "package_name": "com.example.motareb"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqPux1YLdX3_F9oacuH2-VGFc8LP5XhnE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

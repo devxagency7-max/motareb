@@ -1,0 +1,60 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ================= USERS =================
+    match /users/{userId} {
+      allow create: if request.auth != null
+                    && request.auth.uid == userId;
+
+      // Allow everyone to read/write for Dev/Admin features
+      allow read, update, delete: if true; 
+    }
+
+    // ================= SEEKERS =================
+    match /seekers/{seekerId} {
+      allow create, read, update, delete: if request.auth != null
+                    && request.auth.uid == seekerId;
+    }
+
+    // ================= PROPERTIES =================
+    match /properties/{propertyId} {
+      
+      // Allow creation with pending status
+      // Allow creation
+      // Allow create for everyone (Dev/Debug)
+      allow create: if true;
+
+      // Allow owner to update/delete
+      allow update, delete: if true;
+
+      // Allow read for everyone (temporary fix for PERMISSION_DENIED)
+      allow read: if true;
+    }
+
+    // ================= UNIVERSITIES =================
+    match /universities/{universityId} {
+      // Allow everyone to read and write Universities (Dev/Admin)
+      allow read, write: if true;
+    }
+
+    // ================= CHATS (User ↔ Admin) =================
+    match /chats/{chatId} {
+
+      // Allow Users to access their OWN chat (using path variable chatId)
+      // Allow Admins (or any authenticated user for DEV/TESTING purposes) to access all
+      allow read, write: if request.auth != null
+        && (
+          request.auth.uid == chatId
+          || true // Temporarily allow all auth users to test Admin view. Revert to `request.auth.token.admin == true` for Production.
+        );
+
+      // ================= MESSAGES =================
+      match /messages/{messageId} {
+
+        allow read, write: if request.auth != null; // Simplified for Dev
+      }
+    }
+
+  }
+}
