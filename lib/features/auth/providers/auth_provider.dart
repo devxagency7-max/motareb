@@ -6,7 +6,20 @@ class AuthProvider extends ChangeNotifier {
   final AuthService _authService;
 
   AuthProvider({AuthService? authService})
-    : _authService = authService ?? AuthService();
+    : _authService = authService ?? AuthService() {
+    _authService.authStateChanges.listen((User? user) {
+      _user = user;
+      if (user != null) {
+        _fetchUserRolesAndData();
+      } else {
+        _user = null;
+        _userData = null;
+        _isAdmin = false;
+        _isOwner = false;
+      }
+      notifyListeners();
+    });
+  }
 
   User? _user;
   Map<String, dynamic>? _userData;

@@ -15,6 +15,10 @@ class AdminAddPropertyController extends ChangeNotifier {
   final descriptionController = TextEditingController();
   final bedsController = TextEditingController();
   final roomsController = TextEditingController();
+  final singleRoomsController = TextEditingController(); // NEW
+  final doubleRoomsController = TextEditingController(); // NEW
+  final singleBedsController = TextEditingController(); // NEW
+  final doubleBedsController = TextEditingController(); // NEW
   final featuredLabelController = TextEditingController();
   final customRuleController = TextEditingController();
   final customAmenityController = TextEditingController();
@@ -221,6 +225,12 @@ class AdminAddPropertyController extends ChangeNotifier {
         'universities': selectedUniversities,
         'bedsCount': int.tryParse(bedsController.text.trim()) ?? 0,
         'roomsCount': int.tryParse(roomsController.text.trim()) ?? 0,
+        'singleRoomsCount':
+            int.tryParse(singleRoomsController.text.trim()) ?? 0,
+        'doubleRoomsCount':
+            int.tryParse(doubleRoomsController.text.trim()) ?? 0,
+        'singleBedsCount': int.tryParse(singleBedsController.text.trim()) ?? 0,
+        'doubleBedsCount': int.tryParse(doubleBedsController.text.trim()) ?? 0,
       };
 
       await FirebaseFirestore.instance
@@ -304,6 +314,10 @@ class AdminAddPropertyController extends ChangeNotifier {
     descriptionController.dispose();
     bedsController.dispose();
     roomsController.dispose();
+    singleRoomsController.dispose();
+    doubleRoomsController.dispose();
+    singleBedsController.dispose();
+    doubleBedsController.dispose();
     featuredLabelController.dispose();
     customRuleController.dispose();
     customAmenityController.dispose();

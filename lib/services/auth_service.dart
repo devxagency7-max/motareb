@@ -90,6 +90,9 @@ class AuthService {
     return _auth.currentUser;
   }
 
+  // Auth State Changes Stream
+  Stream<User?> get authStateChanges => _auth.authStateChanges();
+
   // Get User Data
   Future<Map<String, dynamic>?> getUserData() async {
     final user = _auth.currentUser;

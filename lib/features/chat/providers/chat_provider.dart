@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io';
+import '../../../../services/r2_upload_service.dart';
 import 'package:flutter/material.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../models/chat_model.dart';
@@ -7,6 +9,7 @@ import '../services/chat_service.dart';
 
 class ChatProvider extends ChangeNotifier {
   final ChatService _chatService = ChatService();
+  final R2UploadService _r2Service = R2UploadService();
   AuthProvider _authProvider;
 
   // Streams
@@ -98,7 +101,12 @@ class ChatProvider extends ChangeNotifier {
   Future<void> sendMessage(String text) async {
     if (_currentChatId == null || text.trim().isEmpty) return;
 
-    final senderId = _authProvider.user!.uid; // Provide actual ID
+    if (_authProvider.user == null) {
+      debugPrint("ChatProvider: User is null. Cannot send message.");
+      return;
+    }
+
+    final senderId = _authProvider.user!.uid;
     final isAdmin = _authProvider.isAdmin;
 
     try {
@@ -112,6 +120,42 @@ class ChatProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint("Error sending message: $e");
       rethrow;
+    }
+  }
+
+  Future<void> sendImageMessage(File imageFile) async {
+    if (_currentChatId == null) return;
+
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final String imageUrl = await _r2Service.uploadFile(
+        imageFile,
+        propertyId: 'chat_images/$_currentChatId',
+      );
+
+      if (_authProvider.user == null) {
+        debugPrint("ChatProvider: User is null. Cannot send image.");
+        return;
+      }
+
+      final senderId = _authProvider.user!.uid;
+      final isAdmin = _authProvider.isAdmin;
+
+      await _chatService.sendMessage(
+        chatId: _currentChatId!,
+        senderId: senderId,
+        text: imageUrl, // For images, the text field contains the URL
+        isAdmin: isAdmin,
+        type: MessageType.image,
+      );
+    } catch (e) {
+      debugPrint("Error sending image: $e");
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 

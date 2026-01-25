@@ -25,10 +25,22 @@ class Property {
   final List<String> universities;
   final int bedsCount;
   final int roomsCount;
+  final int bathroomsCount; // Added
+  final String? videoUrl; // Added
+  final int ratingCount; // Added
+  final List<String> unitTypes; // Added
+  final int singleRoomsCount;
+  final int doubleRoomsCount;
+  final int singleBedsCount;
+  final int doubleBedsCount;
   final List<String> images;
+  final List<Map<String, dynamic>> rooms; // Added for new units structure
 
   // Helpers
   bool get hasAC => amenities.contains('ac') || amenities.contains('تكييف');
+  bool get isBed => unitTypes.contains('bed') || type == 'سرير';
+  bool get isRoom => unitTypes.contains('room') || type == 'غرفة';
+  bool get isStudio => unitTypes.contains('studio') || type == 'ستوديو';
 
   Property({
     required this.id,
@@ -53,7 +65,16 @@ class Property {
     this.universities = const [],
     this.bedsCount = 0,
     this.roomsCount = 0,
+    this.singleRoomsCount = 0,
+    this.doubleRoomsCount = 0,
+    this.singleBedsCount = 0,
+    this.doubleBedsCount = 0,
+    this.bathroomsCount = 1,
     this.images = const [],
+    this.videoUrl,
+    this.ratingCount = 0,
+    this.unitTypes = const [],
+    this.rooms = const [],
   });
 
   factory Property.fromSnapshot(QueryDocumentSnapshot doc) {
@@ -82,6 +103,7 @@ class Property {
             )
           : false,
       rating: (map['rating'] as num?)?.toDouble() ?? 0.0,
+      ratingCount: (map['ratingCount'] as num?)?.toInt() ?? 0,
       amenities:
           (map['amenities'] as List<dynamic>?)
               ?.map((e) => e.toString())
@@ -110,9 +132,25 @@ class Property {
           [],
       bedsCount: (map['bedsCount'] as num?)?.toInt() ?? 0,
       roomsCount: (map['roomsCount'] as num?)?.toInt() ?? 0,
+      singleRoomsCount: (map['singleRoomsCount'] as num?)?.toInt() ?? 0,
+      doubleRoomsCount: (map['doubleRoomsCount'] as num?)?.toInt() ?? 0,
+      singleBedsCount: (map['singleBedsCount'] as num?)?.toInt() ?? 0,
+      doubleBedsCount: (map['doubleBedsCount'] as num?)?.toInt() ?? 0,
+      bathroomsCount: (map['bathroomsCount'] as num?)?.toInt() ?? 1,
       images:
           (map['images'] as List<dynamic>?)
               ?.map((e) => e.toString())
+              .toList() ??
+          [],
+      videoUrl: map['videoUrl'],
+      unitTypes:
+          (map['unitTypes'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+      rooms:
+          (map['rooms'] as List<dynamic>?)
+              ?.map((e) => e as Map<String, dynamic>)
               .toList() ??
           [],
     );
@@ -125,10 +163,12 @@ class Property {
       'price': price,
       'discountPrice': discountPrice,
       'images': images,
+      'videoUrl': videoUrl,
       'isBed': type == 'سرير',
       'isRoom': type == 'غرفة',
       'isVerified': isVerified,
       'rating': rating,
+      'ratingCount': ratingCount,
       'amenities': amenities,
       'rules': rules,
       'status': status,
@@ -141,6 +181,13 @@ class Property {
       'universities': universities,
       'bedsCount': bedsCount,
       'roomsCount': roomsCount,
+      'singleRoomsCount': singleRoomsCount,
+      'doubleRoomsCount': doubleRoomsCount,
+      'singleBedsCount': singleBedsCount,
+      'doubleBedsCount': doubleBedsCount,
+      'bathroomsCount': bathroomsCount,
+      'unitTypes': unitTypes,
+      'rooms': rooms,
     };
   }
 }

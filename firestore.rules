@@ -1,60 +1,50 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+    
+    // Helper function to check if user is authenticated
+    function isAuth() {
+      return request.auth != null;
+    }
 
     // ================= USERS =================
     match /users/{userId} {
-      allow create: if request.auth != null
-                    && request.auth.uid == userId;
-
-      // Allow everyone to read/write for Dev/Admin features
-      allow read, update, delete: if true; 
-    }
-
-    // ================= SEEKERS =================
-    match /seekers/{seekerId} {
-      allow create, read, update, delete: if request.auth != null
-                    && request.auth.uid == seekerId;
+      allow create: if isAuth() && request.auth.uid == userId;
+      allow read, update, delete: if isAuth() && (request.auth.uid == userId || isAdmin());
     }
 
     // ================= PROPERTIES =================
     match /properties/{propertyId} {
-      
-      // Allow creation with pending status
-      // Allow creation
-      // Allow create for everyone (Dev/Debug)
-      allow create: if true;
-
-      // Allow owner to update/delete
-      allow update, delete: if true;
-
-      // Allow read for everyone (temporary fix for PERMISSION_DENIED)
+      // Anyone can read properties (Public)
       allow read: if true;
+      
+      // Only Admin can create, update, or delete
+      allow write: if isAdmin();
     }
 
     // ================= UNIVERSITIES =================
     match /universities/{universityId} {
-      // Allow everyone to read and write Universities (Dev/Admin)
-      allow read, write: if true;
+       allow read: if true;
+       allow write: if isAdmin();
     }
 
-    // ================= CHATS (User ↔ Admin) =================
+    // ================= CHATS =================
     match /chats/{chatId} {
-
-      // Allow Users to access their OWN chat (using path variable chatId)
-      // Allow Admins (or any authenticated user for DEV/TESTING purposes) to access all
-      allow read, write: if request.auth != null
-        && (
-          request.auth.uid == chatId
-          || true // Temporarily allow all auth users to test Admin view. Revert to `request.auth.token.admin == true` for Production.
-        );
-
-      // ================= MESSAGES =================
+      allow read, write: if isAuth() && (request.auth.uid == chatId || isAdmin());
+      
       match /messages/{messageId} {
-
-        allow read, write: if request.auth != null; // Simplified for Dev
+        allow read, write: if isAuth(); 
       }
     }
-
+    
+    // Default: Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
   }
 }

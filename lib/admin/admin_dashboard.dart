@@ -9,6 +9,7 @@ import '../features/chat/screens/admin_chat_list_screen.dart';
 import 'admin_users_screen.dart';
 import 'admin_reservations_screen.dart';
 import 'admin_universities_screen.dart';
+import 'admin_verification_screen.dart';
 
 class AdminDashboard extends StatelessWidget {
   const AdminDashboard({super.key});
@@ -203,6 +204,21 @@ class AdminDashboard extends StatelessWidget {
                     icon: Icons.settings_outlined,
                     color: Colors.grey,
                     onTap: () {},
+                  ),
+                  _buildDashboardCard(
+                    context,
+                    title: 'التوثيق',
+                    subtitle: 'طلبات توثيق الهوية',
+                    icon: Icons.verified_user_outlined,
+                    color: Colors.redAccent,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AdminVerificationScreen(),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),

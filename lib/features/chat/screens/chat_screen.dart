@@ -1,12 +1,17 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+
 import '../providers/chat_provider.dart';
 import '../models/message_model.dart';
-import 'package:flutter_linkify/flutter_linkify.dart';
 import '../../auth/providers/auth_provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class ChatScreen extends StatefulWidget {
   final String chatId;
@@ -20,13 +25,20 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _chatController = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
+  final ImagePicker _picker = ImagePicker();
+
+  // Scroll Controllers for "Jump to Pin" functionality
+  final ItemScrollController _itemScrollController = ItemScrollController();
+  final ItemPositionsListener _itemPositionsListener =
+      ItemPositionsListener.create();
+
+  int _currentPinnedIndex =
+      -1; // Index in the list of Pinned Messages (not the main list)
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Set active chat for Admin interaction
       context.read<ChatProvider>().setActiveChat(widget.chatId);
     });
   }
@@ -34,9 +46,6 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void dispose() {
     _chatController.dispose();
-    _scrollController.dispose();
-    // Don't fully dispose chat provider here or it breaks other listeners if shared,
-    // but setActiveChat just changes stream pointer.
     super.dispose();
   }
 
@@ -46,12 +55,61 @@ class _ChatScreenState extends State<ChatScreen> {
 
     context.read<ChatProvider>().sendMessage(text);
     _chatController.clear();
-
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        0,
+    // Scroll to bottom (index 0)
+    if (_itemScrollController.isAttached) {
+      _itemScrollController.scrollTo(
+        index: 0,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
+      );
+    }
+  }
+
+  Future<void> _pickAndSendImage() async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 70,
+      );
+      if (image != null) {
+        if (!mounted) return;
+        context.read<ChatProvider>().sendImageMessage(File(image.path));
+        // Scroll to bottom
+        if (_itemScrollController.isAttached) {
+          _itemScrollController.jumpTo(index: 0);
+        }
+      }
+    } catch (e) {
+      debugPrint('Error picking image: $e');
+    }
+  }
+
+  void _scrollToNextPinnedMessage(List<Message> messages) {
+    // 1. Find indices of all pinned messages
+    final pinnedIndices = <int>[];
+    for (int i = 0; i < messages.length; i++) {
+      if (messages[i].isPinned) {
+        pinnedIndices.add(i);
+      }
+    }
+
+    if (pinnedIndices.isEmpty) return;
+
+    setState(() {
+      // Move to next pinned message
+      _currentPinnedIndex++;
+      if (_currentPinnedIndex >= pinnedIndices.length) {
+        _currentPinnedIndex = 0; // Wrap around
+      }
+    });
+
+    final targetIndex = pinnedIndices[_currentPinnedIndex];
+
+    if (_itemScrollController.isAttached) {
+      _itemScrollController.scrollTo(
+        index: targetIndex,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
       );
     }
   }
@@ -59,148 +117,182 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     final chatProvider = context.watch<ChatProvider>();
+    // Accessing stream directly in Widget tree isn't ideal for "finding all pinned messages" logic
+    // effectively, but we can do it inside StreamBuilder.
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.userName,
-          style: GoogleFonts.cairo(
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.black),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: chatProvider.isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : StreamBuilder<List<Message>>(
-                    stream: chatProvider.currentMessagesStream,
-                    builder: (context, snapshot) {
-                      if (snapshot.hasError) {
-                        return Center(child: Text('حدث خطأ'));
-                      }
-                      if (!snapshot.hasData) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
+    return StreamBuilder<List<Message>>(
+      stream: chatProvider.currentMessagesStream,
+      builder: (context, snapshot) {
+        final messages = snapshot.data ?? [];
+        final hasPinnedMessages = messages.any((m) => m.isPinned);
 
-                      final messages = snapshot.data!;
-
-                      return ListView.builder(
-                        controller: _scrollController,
-                        padding: const EdgeInsets.all(20),
-                        reverse: true,
+        return Scaffold(
+          backgroundColor: const Color(0xFFE5E5E5).withOpacity(0.5),
+          appBar: _buildAppBar(hasPinnedMessages, messages),
+          body: Column(
+            children: [
+              Expanded(
+                child: chatProvider.isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : (snapshot.hasError)
+                    ? const Center(child: Text('حدث خطأ'))
+                    : (messages.isEmpty)
+                    ? const Center(child: Text('لا توجد رسائل بعد'))
+                    : ScrollablePositionedList.builder(
+                        itemScrollController: _itemScrollController,
+                        itemPositionsListener: _itemPositionsListener,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 20,
+                        ),
+                        reverse: true, // Index 0 is bottom
                         itemCount: messages.length,
                         itemBuilder: (context, index) {
                           final msg = messages[index];
-                          // Admin View: "Me" is the Admin.
-                          // msg.senderId will be Admin ID (auth uid) if sent by admin.
-                          // OR checks against currentUserId.
-                          final currentUserId = context
-                              .read<ChatProvider>()
-                              .currentUserId;
-                          final isMe = msg.senderId == currentUserId;
+                          final isMe =
+                              msg.senderId ==
+                              context.read<ChatProvider>().currentUserId;
 
-                          if (msg.type == MessageType.system) {
-                            return Center(
-                              child: Container(
-                                margin: const EdgeInsets.symmetric(
-                                  vertical: 10,
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade200,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  msg.text,
-                                  style: GoogleFonts.cairo(
-                                    fontSize: 12,
-                                    color: Colors.grey.shade700,
-                                  ),
-                                ),
-                              ),
+                          // Date Grouping Logic
+                          bool showDate = false;
+                          // Since list is reversed, "next" message in list is actually the *previous* message in time.
+                          // We want to show date header ABOVE the message if the message BEFORE it (in time) is different day.
+                          // But in reversed list:
+                          // Index + 1 is the OLDER message.
+                          if (index == messages.length - 1) {
+                            showDate = true; // Oldest message always gets date
+                          } else {
+                            final nextMsg =
+                                messages[index + 1]; // Older message
+                            final currentDay = DateTime(
+                              msg.timestamp.year,
+                              msg.timestamp.month,
+                              msg.timestamp.day,
                             );
+                            final prevDay = DateTime(
+                              nextMsg.timestamp.year,
+                              nextMsg.timestamp.month,
+                              nextMsg.timestamp.day,
+                            );
+                            if (currentDay != prevDay) {
+                              showDate = true;
+                            }
                           }
 
-                          return _buildMessageBubble(context, msg, isMe);
+                          return Column(
+                            children: [
+                              if (showDate) _buildDateHeader(msg.timestamp),
+                              if (msg.type == MessageType.system)
+                                _buildSystemMessage(msg)
+                              else
+                                _buildMessageBubble(context, msg, isMe),
+                            ],
+                          );
                         },
-                      );
-                    },
-                  ),
-          ),
-
-          // Input Area
-          Container(
-            padding: const EdgeInsets.all(15),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(30),
-                topRight: Radius.circular(30),
+                      ),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 10,
-                  offset: Offset(0, -5),
-                ),
-              ],
+              _buildInputArea(chatProvider.isLoading),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  AppBar _buildAppBar(bool hasPinned, List<Message> messages) {
+    return AppBar(
+      title: Row(
+        children: [
+          CircleAvatar(
+            radius: 18,
+            backgroundColor: const Color(0xFF008695),
+            child: Text(
+              widget.userName.isNotEmpty ? widget.userName[0] : '?',
+              style: const TextStyle(fontSize: 14, color: Colors.white),
             ),
-            child: Row(
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    child: TextField(
-                      controller: _chatController,
-                      onSubmitted: (_) => _sendMessage(),
-                      decoration: InputDecoration(
-                        hintText: 'اكتب رسالتك...',
-                        hintStyle: GoogleFonts.cairo(color: Colors.grey),
-                        border: InputBorder.none,
-                      ),
-                    ),
+                Text(
+                  widget.userName,
+                  style: GoogleFonts.cairo(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                    fontSize: 16,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(width: 10),
-                GestureDetector(
-                  onTap: _sendMessage,
-                  child: Container(
-                    width: 50,
-                    height: 50,
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Color(0xFF39BB5E), Color(0xFF008695)],
-                        begin: Alignment.centerRight,
-                        end: Alignment.centerLeft,
-                      ),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.send_rounded,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                  ),
+                Text(
+                  'المستخدم',
+                  style: GoogleFonts.cairo(fontSize: 10, color: Colors.grey),
                 ),
               ],
             ),
           ),
         ],
+      ),
+      backgroundColor: Colors.white,
+      elevation: 1,
+      centerTitle: false,
+      iconTheme: const IconThemeData(color: Colors.black),
+      actions: [
+        if (hasPinned)
+          IconButton(
+            icon: const Icon(Icons.push_pin, color: Colors.orange),
+            onPressed: () => _scrollToNextPinnedMessage(messages),
+            tooltip: 'الانتقال للرسائل المثبتة',
+          ),
+        IconButton(icon: const Icon(Icons.more_vert), onPressed: () {}),
+      ],
+    );
+  }
+
+  Widget _buildDateHeader(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final msgDate = DateTime(date.year, date.month, date.day);
+
+    String text;
+    if (msgDate == today) {
+      text = 'اليوم';
+    } else if (msgDate == yesterday) {
+      text = 'أمس';
+    } else {
+      text = DateFormat('d MMMM yyyy', 'ar').format(date);
+    }
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 15),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        text,
+        style: GoogleFonts.cairo(fontSize: 12, color: Colors.black54),
+      ),
+    );
+  }
+
+  Widget _buildSystemMessage(Message msg) {
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.blueGrey.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          msg.text,
+          style: GoogleFonts.cairo(fontSize: 11, color: Colors.blueGrey),
+          textAlign: TextAlign.center,
+        ),
       ),
     );
   }
@@ -209,19 +301,13 @@ class _ChatScreenState extends State<ChatScreen> {
     final isAdmin = context.read<AuthProvider>().isAdmin;
 
     return FadeInUp(
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 200),
       child: Align(
         alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
         child: GestureDetector(
-          onLongPress: isAdmin
-              ? () {
-                  // Allow admin controls
-                  _showMessageOptions(context, msg);
-                }
-              : null,
+          onLongPress: isAdmin ? () => _showMessageOptions(context, msg) : null,
           child: Container(
-            margin: const EdgeInsets.only(bottom: 15),
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+            margin: const EdgeInsets.only(bottom: 8),
             constraints: BoxConstraints(
               maxWidth: MediaQuery.of(context).size.width * 0.75,
             ),
@@ -233,91 +319,233 @@ class _ChatScreenState extends State<ChatScreen> {
                       end: Alignment.bottomRight,
                     )
                   : null,
-              color: !isMe ? Colors.grey.shade100 : null,
+              color: !isMe ? Colors.white : null,
               borderRadius: BorderRadius.only(
-                topLeft: const Radius.circular(20),
-                topRight: const Radius.circular(20),
-                bottomLeft: Radius.circular(isMe ? 20 : 0),
-                bottomRight: Radius.circular(!isMe ? 20 : 0),
+                topLeft: const Radius.circular(16),
+                topRight: const Radius.circular(16),
+                bottomLeft: Radius.circular(isMe ? 16 : 0),
+                bottomRight: Radius.circular(!isMe ? 16 : 0),
               ),
-              border: msg.isPinned
-                  ? Border.all(color: Colors.orange, width: 2)
-                  : null,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (msg.isPinned)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 5),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.push_pin,
-                          size: 12,
-                          color: Colors.orange,
-                        ),
-                        const SizedBox(width: 5),
-                        Text(
-                          'مثبتة',
-                          style: GoogleFonts.cairo(
-                            fontSize: 10,
-                            color: Colors.orange,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                Linkify(
-                  onOpen: (link) async {
-                    if (await canLaunchUrl(Uri.parse(link.url))) {
-                      await launchUrl(
-                        Uri.parse(link.url),
-                        mode: LaunchMode.externalApplication,
-                      );
-                    }
-                  },
-                  text: msg.text,
-                  style: GoogleFonts.cairo(
-                    color: isMe ? Colors.white : Colors.black87,
-                    fontSize: 14,
-                    height: 1.4,
-                  ),
-                  linkStyle: GoogleFonts.cairo(
-                    color: isMe ? Colors.white : Colors.blue,
-                    decoration: TextDecoration.underline,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  options: const LinkifyOptions(humanize: true),
-                ),
-                const SizedBox(height: 5),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      _formatTime(msg.timestamp),
-                      style: GoogleFonts.cairo(
-                        color: isMe ? Colors.white70 : Colors.grey,
-                        fontSize: 10,
-                      ),
-                    ),
-                    if (msg.isEdited) ...[
-                      const SizedBox(width: 5),
-                      Text(
-                        '(معدلة)',
-                        style: GoogleFonts.cairo(
-                          color: isMe ? Colors.white70 : Colors.grey,
-                          fontSize: 10,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    ],
-                  ],
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 3,
+                  offset: const Offset(0, 1),
                 ),
               ],
             ),
+            child: Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (msg.isPinned) _buildPinnedIndicator(),
+
+                  // Content
+                  if (msg.type == MessageType.image)
+                    _buildImageContent(msg, isMe)
+                  else
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      child: Linkify(
+                        text: msg.text,
+                        onOpen: (link) async {
+                          if (await canLaunchUrl(Uri.parse(link.url))) {
+                            await launchUrl(
+                              Uri.parse(link.url),
+                              mode: LaunchMode.externalApplication,
+                            );
+                          }
+                        },
+                        style: GoogleFonts.cairo(
+                          color: isMe ? Colors.white : Colors.black87,
+                          fontSize: 15,
+                        ),
+                        linkStyle: GoogleFonts.cairo(
+                          color: isMe ? Colors.white : Colors.blue,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+
+                  // Metadata (Time + Ticks)
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: 8,
+                      right: 8,
+                      bottom: 2,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        if (msg.isEdited)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 4),
+                            child: Icon(
+                              Icons.edit,
+                              size: 10,
+                              color: isMe ? Colors.white70 : Colors.grey,
+                            ),
+                          ),
+                        Text(
+                          DateFormat('hh:mm a').format(msg.timestamp),
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: isMe ? Colors.white70 : Colors.grey[600],
+                          ),
+                        ),
+                        if (isMe) ...[
+                          const SizedBox(width: 4),
+                          Icon(
+                            msg.isRead ? Icons.done_all : Icons.done,
+                            size: 14,
+                            color: msg.isRead
+                                ? Colors.blueAccent.shade100
+                                : Colors.white70,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPinnedIndicator() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8, right: 8, top: 4),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.push_pin, size: 12, color: Colors.orange),
+          const SizedBox(width: 4),
+          Text(
+            'مثبتة',
+            style: GoogleFonts.cairo(fontSize: 10, color: Colors.orange),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImageContent(Message msg, bool isMe) {
+    return GestureDetector(
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (_) =>
+              Dialog(child: InteractiveViewer(child: Image.network(msg.text))),
+        );
+      },
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Image.network(
+          msg.text,
+          width: 200,
+          fit: BoxFit.cover,
+          loadingBuilder: (ctx, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return Container(
+              width: 200,
+              height: 200,
+              color: Colors.black12,
+              child: const Center(child: CircularProgressIndicator()),
+            );
+          },
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              width: 200,
+              height: 200,
+              color: Colors.grey[300],
+              child: const Icon(Icons.broken_image, color: Colors.grey),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInputArea(bool isLoading) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 5)],
+      ),
+      child: SafeArea(
+        child: Row(
+          children: [
+            IconButton(
+              icon: const Icon(
+                Icons.add_photo_alternate_rounded,
+                color: Color(0xFF008695),
+              ),
+              onPressed: isLoading ? null : _pickAndSendImage,
+            ),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(25),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: TextField(
+                  controller: _chatController,
+                  maxLines: 5,
+                  minLines: 1,
+                  decoration: InputDecoration(
+                    hintText: 'اكتب رسالة...',
+                    hintStyle: GoogleFonts.cairo(color: Colors.grey),
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: isLoading ? null : _sendMessage,
+              child: Container(
+                width: 45,
+                height: 45,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF39BB5E), Color(0xFF008695)],
+                  ),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF008695).withOpacity(0.4),
+                      blurRadius: 6,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: isLoading
+                    ? const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Icon(
+                        Icons.send_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -335,19 +563,16 @@ class _ChatScreenState extends State<ChatScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildOptionTile(
-                icon: Icons.copy,
-                color: Colors.blue,
-                text: 'نسخ النص',
-                onTap: () {
-                  Navigator.pop(context);
-                  // Clipboard logic could go here
-                },
-              ),
-              _buildOptionTile(
-                icon: msg.isPinned ? Icons.push_pin_outlined : Icons.push_pin,
-                color: Colors.orange,
-                text: msg.isPinned ? 'إلغاء التثبيت' : 'تثبيت الرسالة',
+              // Pin / Unpin
+              ListTile(
+                leading: Icon(
+                  msg.isPinned ? Icons.push_pin_outlined : Icons.push_pin,
+                  color: Colors.orange,
+                ),
+                title: Text(
+                  msg.isPinned ? 'إلغاء التثبيت' : 'تثبيت الرسالة',
+                  style: GoogleFonts.cairo(),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   context.read<ChatProvider>().pinMessage(
@@ -356,22 +581,33 @@ class _ChatScreenState extends State<ChatScreen> {
                   );
                 },
               ),
-              _buildOptionTile(
-                icon: Icons.edit,
-                color: Colors.green,
-                text: 'تعديل الرسالة',
+              if (msg.type == MessageType.text) ...[
+                // Edit
+                ListTile(
+                  leading: const Icon(Icons.edit, color: Colors.blue),
+                  title: Text('تعديل', style: GoogleFonts.cairo()),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showEditDialog(context, msg);
+                  },
+                ),
+                // Copy
+                ListTile(
+                  leading: const Icon(Icons.copy, color: Colors.grey),
+                  title: Text('نسخ', style: GoogleFonts.cairo()),
+                  onTap: () {
+                    // Clipboard logic
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+              // Delete
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: Text('حذف', style: GoogleFonts.cairo()),
                 onTap: () {
                   Navigator.pop(context);
-                  _showEditDialog(context, msg);
-                },
-              ),
-              _buildOptionTile(
-                icon: Icons.delete,
-                color: Colors.red,
-                text: 'حذف الرسالة',
-                onTap: () {
-                  Navigator.pop(context);
-                  _confirmDelete(context, msg);
+                  context.read<ChatProvider>().deleteMessage(msg.id);
                 },
               ),
             ],
@@ -381,101 +617,50 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _buildOptionTile({
-    required IconData icon,
-    required Color color,
-    required String text,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icon, color: color, size: 20),
-      ),
-      title: Text(text, style: GoogleFonts.cairo(fontWeight: FontWeight.bold)),
-      onTap: onTap,
-    );
-  }
-
   void _showEditDialog(BuildContext context, Message msg) {
-    final controller = TextEditingController(text: msg.text);
+    final TextEditingController editController = TextEditingController(
+      text: msg.text,
+    );
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'تعديل الرسالة',
-          style: GoogleFonts.cairo(fontWeight: FontWeight.bold),
-        ),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(border: OutlineInputBorder()),
-          maxLines: 3,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('إلغاء', style: GoogleFonts.cairo(color: Colors.grey)),
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            'تعديل الرسالة',
+            style: GoogleFonts.cairo(fontWeight: FontWeight.bold),
           ),
-          ElevatedButton(
-            onPressed: () {
-              if (controller.text.trim().isNotEmpty) {
-                context.read<ChatProvider>().editMessage(
-                  msg.id,
-                  controller.text.trim(),
-                );
-                Navigator.pop(context);
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF008695),
+          content: TextField(
+            controller: editController,
+            maxLines: 3,
+            decoration: const InputDecoration(border: OutlineInputBorder()),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'إلغاء',
+                style: GoogleFonts.cairo(color: Colors.grey),
+              ),
             ),
-            child: Text('حفظ', style: GoogleFonts.cairo(color: Colors.white)),
-          ),
-        ],
-      ),
+            ElevatedButton(
+              onPressed: () {
+                if (editController.text.trim().isNotEmpty) {
+                  context.read<ChatProvider>().editMessage(
+                    msg.id,
+                    editController.text.trim(),
+                  );
+                }
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF008695),
+              ),
+              child: Text('حفظ', style: GoogleFonts.cairo(color: Colors.white)),
+            ),
+          ],
+        );
+      },
     );
-  }
-
-  void _confirmDelete(BuildContext context, Message msg) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'حذف الرسالة؟',
-          style: GoogleFonts.cairo(fontWeight: FontWeight.bold),
-        ),
-        content: Text(
-          'هل أنت متأكد من حذف هذه الرسالة نهائياً؟',
-          style: GoogleFonts.cairo(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('إلغاء', style: GoogleFonts.cairo(color: Colors.grey)),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              context.read<ChatProvider>().deleteMessage(msg.id);
-              Navigator.pop(context);
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: Text('حذف', style: GoogleFonts.cairo(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _formatTime(DateTime time) {
-    final hour = time.hour > 12
-        ? time.hour - 12
-        : (time.hour == 0 ? 12 : time.hour);
-    final minute = time.minute.toString().padLeft(2, '0');
-    final period = time.hour >= 12 ? 'م' : 'ص';
-    return '$hour:$minute $period';
   }
 }

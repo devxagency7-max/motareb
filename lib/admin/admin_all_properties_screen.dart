@@ -6,7 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import '../core/models/property_model.dart';
 // import 'admin_add_property_screen.dart';
-import 'admin_property_details_screen.dart';
+// import 'admin_property_details_screen.dart';
 
 class AdminAllPropertiesScreen extends StatefulWidget {
   const AdminAllPropertiesScreen({super.key});
@@ -154,6 +154,70 @@ class _AdminAllPropertiesScreenState extends State<AdminAllPropertiesScreen> {
     );
   }
 
+  Future<void> _deleteProperty(BuildContext context, Property property) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(
+          'تأكيد الحذف',
+          style: GoogleFonts.cairo(fontWeight: FontWeight.bold),
+          textAlign: TextAlign.right,
+        ),
+        content: Text(
+          'هل أنت متأكد من حذف العقار "${property.title}" نهائياً؟\nلا يمكن التراجع عن هذه العملية.',
+          style: GoogleFonts.cairo(),
+          textAlign: TextAlign.right,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('إلغاء', style: GoogleFonts.cairo(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(
+              'حذف',
+              style: GoogleFonts.cairo(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('properties')
+          .doc(property.id)
+          .delete();
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'تم حذف العقار بنجاح 🗑️',
+              style: GoogleFonts.cairo(),
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('فشل الحذف: $e', style: GoogleFonts.cairo()),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Widget _buildPropertyListItem(BuildContext context, Property property) {
     Color statusColor;
     String statusText;
@@ -172,109 +236,148 @@ class _AdminAllPropertiesScreenState extends State<AdminAllPropertiesScreen> {
         statusText = 'قيد المراجعة ⏳';
     }
 
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                AdminPropertyDetailsScreen(property: property),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 15),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
           ),
-        );
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 15),
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 5,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // Thumbnail
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: SizedBox(
-                width: 80,
-                height: 80,
-                child: property.images.isNotEmpty
-                    ? (property.images.first.startsWith('http')
-                          ? Image.network(
+        ],
+      ),
+      child: Row(
+        children: [
+          // Thumbnail
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: SizedBox(
+              width: 90,
+              height: 90,
+              child: property.images.isNotEmpty
+                  ? (property.images.first.startsWith('http')
+                        ? Image.network(
+                            property.images.first,
+                            fit: BoxFit.cover,
+                          )
+                        : Image.memory(
+                            const Base64Decoder().convert(
                               property.images.first,
-                              fit: BoxFit.cover,
-                            )
-                          : Image.memory(
-                              const Base64Decoder().convert(
-                                property.images.first,
-                              ),
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(Icons.broken_image),
-                            ))
-                    : Image.asset(
-                        'assets/images/intro2.png',
-                        fit: BoxFit.cover,
-                      ),
-              ),
+                            ),
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(Icons.broken_image),
+                          ))
+                  : Image.asset('assets/images/intro2.png', fit: BoxFit.cover),
             ),
-            const SizedBox(width: 15),
+          ),
+          const SizedBox(width: 15),
 
-            // Info
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    property.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.cairo(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                  Text(
-                    '${property.price.toInt()} ج.م',
-                    style: GoogleFonts.cairo(
-                      color: const Color(0xFF008695),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(5),
-                      border: Border.all(color: statusColor.withOpacity(0.5)),
-                    ),
-                    child: Text(
-                      statusText,
-                      style: GoogleFonts.cairo(
-                        color: statusColor,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
+          // Info
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        property.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.cairo(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
                       ),
                     ),
+                  ],
+                ),
+                const SizedBox(height: 5),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.blueGrey.shade50,
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: Colors.blueGrey.shade200),
+                      ),
+                      child: Text(
+                        property.id,
+                        style: GoogleFonts.cairo(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blueGrey.shade800,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: statusColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: statusColor.withOpacity(0.5)),
+                      ),
+                      child: Text(
+                        statusText,
+                        style: GoogleFonts.cairo(
+                          color: statusColor,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${property.price.toInt()} ج.م',
+                  style: GoogleFonts.cairo(
+                    color: const Color(0xFF008695),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
 
-            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-          ],
-        ),
+          // Actions
+          Column(
+            children: [
+              IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          AdminAddPropertyScreen(propertyToEdit: property),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.edit, color: Colors.blue),
+                tooltip: 'تعديل',
+              ),
+              IconButton(
+                onPressed: () => _deleteProperty(context, property),
+                icon: const Icon(Icons.delete, color: Colors.red),
+                tooltip: 'حذف',
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
