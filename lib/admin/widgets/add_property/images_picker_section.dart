@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:admin_motareb/utils/custom_snackbar.dart';
 import 'package:admin_motareb/services/r2_upload_service.dart';
+import 'package:admin_motareb/core/utils/loc_extension.dart';
 import 'add_property_helpers.dart';
 
 class ImagesPickerSection extends StatefulWidget {
@@ -37,7 +38,7 @@ class _ImagesPickerSectionState extends State<ImagesPickerSection> {
       if (mounted) {
         CustomSnackBar.show(
           context: context,
-          message: 'يجب إدخال رقم العقار أولاً! ⚠️',
+          message: context.loc.enterPropertyIdFirst,
           isError: true,
         );
       }
@@ -47,7 +48,7 @@ class _ImagesPickerSectionState extends State<ImagesPickerSection> {
       if (mounted) {
         CustomSnackBar.show(
           context: context,
-          message: '❌ لا يمكن الرفع: المسلسل موجود بالفعل',
+          message: context.loc.cannotUploadDuplicateId,
           isError: true,
         );
       }
@@ -116,7 +117,7 @@ class _ImagesPickerSectionState extends State<ImagesPickerSection> {
     if (number.isEmpty) {
       CustomSnackBar.show(
         context: context,
-        message: 'يجب إدخال رقم العقار أولاً! ⚠️',
+        message: context.loc.enterPropertyIdFirst,
         isError: true,
       );
       return;
@@ -124,7 +125,7 @@ class _ImagesPickerSectionState extends State<ImagesPickerSection> {
     if (widget.idErrorNotifier.value != null) {
       CustomSnackBar.show(
         context: context,
-        message: '❌ لا يمكن الرفع: المسلسل موجود بالفعل',
+        message: context.loc.cannotUploadDuplicateId,
         isError: true,
       );
       return;
@@ -162,7 +163,7 @@ class _ImagesPickerSectionState extends State<ImagesPickerSection> {
             });
             CustomSnackBar.show(
               context: context,
-              message: 'تم رفع الفيديو بنجاح 🎥',
+              message: context.loc.videoUploadedSuccess,
               isError: false,
             );
           }
@@ -201,7 +202,7 @@ class _ImagesPickerSectionState extends State<ImagesPickerSection> {
         widget.videoNotifier.value = null;
         CustomSnackBar.show(
           context: context,
-          message: 'تم حذف الفيديو بنجاح 🗑️',
+          message: context.loc.videoDeleteSuccess,
           isError: false,
         );
       }
@@ -233,7 +234,7 @@ class _ImagesPickerSectionState extends State<ImagesPickerSection> {
 
         CustomSnackBar.show(
           context: context,
-          message: 'تم حذف الصورة بنجاح 🗑️',
+          message: context.loc.imageDeleteSuccess,
           isError: false,
         );
       }
@@ -253,7 +254,7 @@ class _ImagesPickerSectionState extends State<ImagesPickerSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionLabel('صور العقار 📸'),
+        SectionLabel(context.loc.propertyImages),
         const SizedBox(height: 10),
         SizedBox(
           height: 140,
@@ -314,7 +315,7 @@ class _ImagesPickerSectionState extends State<ImagesPickerSection> {
                               ),
                               const SizedBox(height: 5),
                               Text(
-                                'إضافة صور',
+                                context.loc.addPhotos,
                                 style: GoogleFonts.cairo(
                                   color: const Color(0xFF39BB5E),
                                   fontWeight: FontWeight.bold,
@@ -350,9 +351,9 @@ class _ImagesPickerSectionState extends State<ImagesPickerSection> {
                               ),
                             ),
                             const SizedBox(height: 5),
-                            const Text(
-                              'جاري الرفع...',
-                              style: TextStyle(fontSize: 10),
+                            Text(
+                              context.loc.uploading,
+                              style: const TextStyle(fontSize: 10),
                             ),
                             const SizedBox(height: 5),
                             const CircularProgressIndicator(strokeWidth: 2),
@@ -415,7 +416,7 @@ class _ImagesPickerSectionState extends State<ImagesPickerSection> {
           ),
         ),
         const SizedBox(height: 20),
-        const SectionLabel('فيديو العقار (اختياري) 🎥'),
+        SectionLabel(context.loc.propertyVideoOptional),
         const SizedBox(height: 10),
         ValueListenableBuilder<String?>(
           valueListenable: widget.videoNotifier,
@@ -438,9 +439,9 @@ class _ImagesPickerSectionState extends State<ImagesPickerSection> {
                   children: [
                     const Icon(Icons.check_circle, color: Colors.green),
                     const SizedBox(width: 10),
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'تم رفع الفيديو بنجاح ✅',
+                        context.loc.videoUploadedSuccess,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -482,7 +483,7 @@ class _ImagesPickerSectionState extends State<ImagesPickerSection> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'جاري رفع الفيديو...',
+                          context.loc.uploadingVideo,
                           style: GoogleFonts.cairo(
                             fontSize: 14,
                             color: Colors.blue.shade700,
@@ -530,7 +531,7 @@ class _ImagesPickerSectionState extends State<ImagesPickerSection> {
                       Icon(Icons.video_library, color: Colors.grey.shade600),
                       const SizedBox(width: 8),
                       Text(
-                        'اضغط لرفع فيديو',
+                        context.loc.clickToUploadVideo,
                         style: GoogleFonts.cairo(color: Colors.grey.shade700),
                       ),
                     ],

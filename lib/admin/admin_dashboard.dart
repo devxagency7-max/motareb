@@ -84,7 +84,7 @@ class AdminDashboard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'أهلاً بك، أدمن 👋',
+                      context.loc.welcomeAdmin,
                       style: GoogleFonts.cairo(
                         color: Colors.white,
                         fontSize: 22,
@@ -93,7 +93,7 @@ class AdminDashboard extends StatelessWidget {
                     ),
                     const SizedBox(height: 5),
                     Text(
-                      'لديك سلطة كاملة لإدارة التطبيق.',
+                      context.loc.adminSubHeader,
                       style: GoogleFonts.cairo(
                         color: Colors.white.withOpacity(0.9),
                         fontSize: 14,
@@ -115,7 +115,7 @@ class AdminDashboard extends StatelessWidget {
                   _buildDashboardCard(
                     context,
                     title: context.loc.reservations,
-                    subtitle: 'إدارة جميع الحجوزات',
+                    subtitle: context.loc.manageReservations,
                     icon: Icons.calendar_today_outlined,
                     color: Colors.indigo,
                     onTap: () {
@@ -129,8 +129,8 @@ class AdminDashboard extends StatelessWidget {
                   ),
                   _buildDashboardCard(
                     context,
-                    title: 'المحادثات',
-                    subtitle: 'الدعم الفني',
+                    title: context.loc.chats,
+                    subtitle: context.loc.technicalSupport,
                     icon: Icons.chat_bubble_outline,
                     color: Colors.teal,
                     onTap: () {
@@ -146,7 +146,7 @@ class AdminDashboard extends StatelessWidget {
                   _buildDashboardCard(
                     context,
                     title: context.loc.addProperty,
-                    subtitle: 'نشر عقار جديد',
+                    subtitle: context.loc.newPropertyPublish,
                     icon: Icons.add_home_work,
                     color: const Color(0xFF39BB5E),
                     onTap: () {
@@ -161,8 +161,8 @@ class AdminDashboard extends StatelessWidget {
 
                   _buildDashboardCard(
                     context,
-                    title: 'طلبات النشر',
-                    subtitle: 'مراجعة وقبول الشقق',
+                    title: context.loc.publicationRequests,
+                    subtitle: context.loc.reviewAcceptProperties,
                     icon: Icons.assignment_late_outlined,
                     color: Colors.orange,
                     onTap: () {
@@ -177,8 +177,8 @@ class AdminDashboard extends StatelessWidget {
                   ),
                   _buildDashboardCard(
                     context,
-                    title: 'كل الشقق',
-                    subtitle: 'إدارة وتعديل الكل',
+                    title: context.loc.allApartments,
+                    subtitle: context.loc.manageEditAll,
                     icon: Icons.apartment,
                     color: Colors.blue,
                     onTap: () {
@@ -195,7 +195,7 @@ class AdminDashboard extends StatelessWidget {
                   _buildDashboardCard(
                     context,
                     title: context.loc.users,
-                    subtitle: 'إدارة الحسابات',
+                    subtitle: context.loc.manageAccounts,
                     icon: Icons.people_outline,
                     color: Colors.purple,
                     onTap: () {
@@ -209,8 +209,8 @@ class AdminDashboard extends StatelessWidget {
                   ),
                   _buildDashboardCard(
                     context,
-                    title: 'الجامعات',
-                    subtitle: 'إدارة الجامعات',
+                    title: context.loc.universities,
+                    subtitle: context.loc.manageUniversities,
                     icon: Icons.school,
                     color: Colors.blueGrey,
                     onTap: () {
@@ -225,15 +225,15 @@ class AdminDashboard extends StatelessWidget {
                   _buildDashboardCard(
                     context,
                     title: context.loc.settings,
-                    subtitle: 'إعدادات عامة',
+                    subtitle: context.loc.generalSettings,
                     icon: Icons.settings_outlined,
                     color: Colors.grey,
                     onTap: () {},
                   ),
                   _buildDashboardCard(
                     context,
-                    title: 'التوثيق',
-                    subtitle: 'طلبات توثيق الهوية',
+                    title: context.loc.verification,
+                    subtitle: context.loc.identityRequests,
                     icon: Icons.verified_user_outlined,
                     color: Colors.redAccent,
                     onTap: () {
@@ -247,8 +247,8 @@ class AdminDashboard extends StatelessWidget {
                   ),
                   _buildDashboardCard(
                     context,
-                    title: 'الأرقام',
-                    subtitle: 'إدارة أرقام التواصل',
+                    title: context.loc.numbers,
+                    subtitle: context.loc.manageContactNumbers,
                     icon: Icons.phone_android,
                     color: Colors.blueAccent,
                     onTap: () {

@@ -54,7 +54,8 @@ class CustomTextField extends StatelessWidget {
   final String? hint;
   final TextEditingController controller;
   final TextInputType keyboardType;
-  final int maxLines;
+  final int? maxLines;
+  final int? minLines;
   final IconData? icon;
   final Function(String)? onChanged;
   final TextDirection? textDirection;
@@ -66,6 +67,7 @@ class CustomTextField extends StatelessWidget {
     required this.controller,
     this.keyboardType = TextInputType.text,
     this.maxLines = 1,
+    this.minLines,
     this.icon,
     this.onChanged,
     this.textDirection,
@@ -78,6 +80,7 @@ class CustomTextField extends StatelessWidget {
       controller: controller,
       keyboardType: keyboardType,
       maxLines: maxLines,
+      minLines: minLines,
       textDirection: textDirection,
       style: GoogleFonts.cairo(),
       decoration: InputDecoration(
@@ -274,6 +277,102 @@ class DynamicAddField extends StatelessWidget {
             color: Color(0xFF008695),
             size: 30,
           ),
+        ),
+      ],
+    );
+  }
+}
+
+class BilingualAddField extends StatelessWidget {
+  final TextEditingController arController;
+  final TextEditingController enController;
+  final String arHint;
+  final String enHint;
+  final Function(String ar, String en) onAdd;
+
+  const BilingualAddField({
+    super.key,
+    required this.arController,
+    required this.enController,
+    required this.arHint,
+    required this.enHint,
+    required this.onAdd,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                children: [
+                  TextField(
+                    controller: arController,
+                    style: GoogleFonts.cairo(fontSize: 14),
+                    textDirection: TextDirection.rtl,
+                    decoration: InputDecoration(
+                      hintText: arHint,
+                      hintStyle: GoogleFonts.cairo(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 15,
+                        vertical: 10,
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey.shade50,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: enController,
+                    style: GoogleFonts.cairo(fontSize: 14),
+                    textDirection: TextDirection.ltr,
+                    decoration: InputDecoration(
+                      hintText: enHint,
+                      hintStyle: GoogleFonts.cairo(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 15,
+                        vertical: 10,
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey.shade50,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              onPressed: () {
+                if (arController.text.trim().isNotEmpty &&
+                    enController.text.trim().isNotEmpty) {
+                  onAdd(arController.text.trim(), enController.text.trim());
+                  arController.clear();
+                  enController.clear();
+                }
+              },
+              icon: const Icon(
+                Icons.add_circle,
+                color: Color(0xFF008695),
+                size: 35,
+              ),
+            ),
+          ],
         ),
       ],
     );

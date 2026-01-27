@@ -2,16 +2,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:admin_motareb/utils/custom_snackbar.dart';
+import 'package:admin_motareb/core/utils/loc_extension.dart';
 import 'add_property_helpers.dart';
 
 class UniversitiesSelectorSection extends StatelessWidget {
-  final ValueNotifier<List<String>> selectedUniversitiesNotifier;
+  final ValueNotifier<List<Map<String, dynamic>>> selectedUniversitiesNotifier;
   final TextEditingController customUniversityController;
+  final TextEditingController customUniversityEnController;
 
   const UniversitiesSelectorSection({
     super.key,
     required this.selectedUniversitiesNotifier,
     required this.customUniversityController,
+    required this.customUniversityEnController,
   });
 
   @override
@@ -39,28 +42,37 @@ class UniversitiesSelectorSection extends StatelessWidget {
         }
 
         final docs = snapshot.data?.docs ?? [];
-        final globalUniversities = docs
-            .map(
-              (doc) => (doc.data() as Map<String, dynamic>)['name'] as String,
-            )
-            .toList();
+        final globalUniversities = docs.map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          return {
+            'ar': data['name'] ?? '',
+            'en': data['nameEn'] ?? data['name'] ?? '',
+          };
+        }).toList();
 
-        return ValueListenableBuilder<List<String>>(
+        return ValueListenableBuilder<List<Map<String, dynamic>>>(
           valueListenable: selectedUniversitiesNotifier,
           builder: (context, selected, child) {
-            final allUniversities = {
-              ...globalUniversities,
-              ...selected,
-            }.toList();
+            // Merge global and selected (by Arabic name to avoid duplicates if possible)
+            final allUniversities = List<Map<String, dynamic>>.from(
+              globalUniversities,
+            );
+            for (var sel in selected) {
+              if (!allUniversities.any((uni) => uni['ar'] == sel['ar'])) {
+                allUniversities.add(sel);
+              }
+            }
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SectionLabel('الجامعات المجاورة 🎓', fontSize: 14),
+                SectionLabel(context.loc.nearbyUniversities, fontSize: 14),
                 const SizedBox(height: 10),
                 if (allUniversities.isEmpty)
                   Text(
-                    'لا توجد جامعات مضافة بعد',
+                    context
+                        .loc
+                        .noRoomsAdded, // Reusing noRoomsAdded for simplicity if applicable, or add specific key
                     style: GoogleFonts.cairo(color: Colors.grey),
                   )
                 else
@@ -68,14 +80,19 @@ class UniversitiesSelectorSection extends StatelessWidget {
                     spacing: 8,
                     runSpacing: 8,
                     children: allUniversities.map((uni) {
+                      final isSelected = selected.any(
+                        (s) => s['ar'] == uni['ar'],
+                      );
                       return SelectableChip(
-                        label: uni,
-                        value: uni,
-                        isSelected: selected.contains(uni),
+                        label: "${uni['ar']} | ${uni['en']}",
+                        value: uni['ar'],
+                        isSelected: isSelected,
                         onTap: () {
-                          final list = List<String>.from(selected);
-                          if (list.contains(uni)) {
-                            list.remove(uni);
+                          final list = List<Map<String, dynamic>>.from(
+                            selected,
+                          );
+                          if (isSelected) {
+                            list.removeWhere((s) => s['ar'] == uni['ar']);
                           } else {
                             list.add(uni);
                           }
@@ -85,30 +102,54 @@ class UniversitiesSelectorSection extends StatelessWidget {
                     }).toList(),
                   ),
                 const SizedBox(height: 15),
-                DynamicAddField(
-                  controller: customUniversityController,
-                  hint: 'أضف جامعة جديدة (خاصة بهذا العقار)...',
-                  onAdd: (val) {
-                    final trimmedVal = val.trim();
-                    if (trimmedVal.isNotEmpty) {
-                      final list = List<String>.from(
+                BilingualAddField(
+                  arController: customUniversityController,
+                  enController: customUniversityEnController,
+                  arHint:
+                      context.loc.addCustomUniversity, // localized or default
+                  enHint: "University Name (EN)",
+                  onAdd: (ar, en) async {
+                    final trimmedAr = ar.trim();
+                    final trimmedEn = en.trim().isEmpty ? ar.trim() : en.trim();
+
+                    if (trimmedAr.isNotEmpty) {
+                      final newUni = {'ar': trimmedAr, 'en': trimmedEn};
+                      final list = List<Map<String, dynamic>>.from(
                         selectedUniversitiesNotifier.value,
                       );
-                      if (!list.contains(trimmedVal)) {
-                        list.add(trimmedVal);
+
+                      if (!list.any((u) => u['ar'] == trimmedAr)) {
+                        list.add(newUni);
                         selectedUniversitiesNotifier.value = list;
 
-                        CustomSnackBar.show(
-                          context: context,
-                          message: 'تم إضافة الجامعة للعقار ✅',
-                          isError: false,
-                        );
+                        // ALSO save to global universities collection
+                        try {
+                          await FirebaseFirestore.instance
+                              .collection('universities')
+                              .add({
+                                'name': trimmedAr,
+                                'nameEn': trimmedEn,
+                                'createdAt': FieldValue.serverTimestamp(),
+                              });
+                        } catch (e) {
+                          debugPrint("Error saving university globally: $e");
+                        }
+
+                        if (context.mounted) {
+                          CustomSnackBar.show(
+                            context: context,
+                            message: context.loc.universityAdded,
+                            isError: false,
+                          );
+                        }
                       } else {
-                        CustomSnackBar.show(
-                          context: context,
-                          message: 'هذه الجامعة مضافة بالفعل ⚠️',
-                          isError: true,
-                        );
+                        if (context.mounted) {
+                          CustomSnackBar.show(
+                            context: context,
+                            message: context.loc.universityAlreadyAdded,
+                            isError: true,
+                          );
+                        }
                       }
                     }
                   },

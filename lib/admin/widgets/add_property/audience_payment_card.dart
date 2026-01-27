@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:admin_motareb/core/utils/loc_extension.dart';
 import 'add_property_helpers.dart';
 
 class AudiencePaymentCard extends StatelessWidget {
@@ -15,7 +16,7 @@ class AudiencePaymentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GlassCard(
       children: [
-        const SectionLabel('الفئة المستهدفة ونظام الدفع 🎯'),
+        SectionLabel(context.loc.audienceAndPayment),
         const SizedBox(height: 15),
         ValueListenableBuilder<String>(
           valueListenable: genderNotifier,
@@ -24,7 +25,7 @@ class AudiencePaymentCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: GradientSelectionCard(
-                    title: 'شباب 👨',
+                    title: context.loc.males,
                     isSelected: gender == 'male' || gender == 'both',
                     onTap: () {
                       if (gender == 'female') {
@@ -40,7 +41,7 @@ class AudiencePaymentCard extends StatelessWidget {
                 const SizedBox(width: 15),
                 Expanded(
                   child: GradientSelectionCard(
-                    title: 'بنات 👩',
+                    title: context.loc.females,
                     isSelected: gender == 'female' || gender == 'both',
                     onTap: () {
                       if (gender == 'male') {
@@ -58,7 +59,7 @@ class AudiencePaymentCard extends StatelessWidget {
           },
         ),
         const SizedBox(height: 20),
-        const SectionLabel('نظام الدفع', fontSize: 14),
+        SectionLabel(context.loc.paymentSystem, fontSize: 14),
         const SizedBox(height: 8),
         ValueListenableBuilder<List<String>>(
           valueListenable: paymentMethodsNotifier,
@@ -68,19 +69,19 @@ class AudiencePaymentCard extends StatelessWidget {
               runSpacing: 10,
               children: [
                 SelectableChip(
-                  label: 'شهري',
+                  label: context.loc.monthly,
                   value: 'monthly',
                   isSelected: selected.contains('monthly'),
                   onTap: () => _togglePayment('monthly', selected),
                 ),
                 SelectableChip(
-                  label: 'بالترم',
+                  label: context.loc.termly,
                   value: 'term',
                   isSelected: selected.contains('term'),
                   onTap: () => _togglePayment('term', selected),
                 ),
                 SelectableChip(
-                  label: 'سنوي',
+                  label: context.loc.yearly,
                   value: 'year',
                   isSelected: selected.contains('year'),
                   onTap: () => _togglePayment('year', selected),

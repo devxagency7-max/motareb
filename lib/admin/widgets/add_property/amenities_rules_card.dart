@@ -1,40 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:admin_motareb/core/utils/loc_extension.dart';
 import 'add_property_helpers.dart';
 
 class AmenitiesRulesCard extends StatelessWidget {
-  final ValueNotifier<List<String>> amenitiesNotifier;
-  final ValueNotifier<List<String>> rulesNotifier;
+  final ValueNotifier<List<Map<String, dynamic>>> amenitiesNotifier;
+  final ValueNotifier<List<Map<String, dynamic>>> rulesNotifier;
   final TextEditingController customAmenityController;
+  final TextEditingController customAmenityEnController;
   final TextEditingController customRuleController;
+  final TextEditingController customRuleEnController;
 
   const AmenitiesRulesCard({
     super.key,
     required this.amenitiesNotifier,
     required this.rulesNotifier,
     required this.customAmenityController,
+    required this.customAmenityEnController,
     required this.customRuleController,
+    required this.customRuleEnController,
   });
 
-  static const List<String> _suggestedAmenities = [
-    'واي فاي',
-    'تكييف',
-    'بلكونة',
-    'مطبخ',
-    'مفروش',
-    'أسانسير',
-    'أمن',
-    'جراج',
-    'قريب من المواصلات',
+  static const List<Map<String, String>> _suggestedAmenities = [
+    {'ar': 'واي فاي', 'en': 'Wi-Fi'},
+    {'ar': 'تكييف', 'en': 'Air Conditioning'},
+    {'ar': 'بلكونة', 'en': 'Balcony'},
+    {'ar': 'مطبخ', 'en': 'Kitchen'},
+    {'ar': 'مفروش', 'en': 'Furnished'},
+    {'ar': 'أسانسير', 'en': 'Elevator'},
+    {'ar': 'أمن', 'en': 'Security'},
+    {'ar': 'جراج', 'en': 'Garage'},
+    {'ar': 'قريب من المواصلات', 'en': 'Near Transport'},
   ];
 
   @override
   Widget build(BuildContext context) {
     return GlassCard(
       children: [
-        const SectionLabel('المميزات والإضافات ✨'),
+        SectionLabel(context.loc.amenitiesAndExtras),
         const SizedBox(height: 10),
-        ValueListenableBuilder<List<String>>(
+        ValueListenableBuilder<List<Map<String, dynamic>>>(
           valueListenable: amenitiesNotifier,
           builder: (context, amenities, child) {
             return Column(
@@ -43,15 +48,17 @@ class AmenitiesRulesCard extends StatelessWidget {
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
-                  children: _suggestedAmenities.map((amenity) {
-                    final isSelected = amenities.contains(amenity);
+                  children: _suggestedAmenities.map((suggested) {
+                    final isSelected = amenities.any(
+                      (a) => a['ar'] == suggested['ar'],
+                    );
                     return GestureDetector(
                       onTap: () {
-                        final list = List<String>.from(amenities);
+                        final list = List<Map<String, dynamic>>.from(amenities);
                         if (isSelected) {
-                          list.remove(amenity);
+                          list.removeWhere((a) => a['ar'] == suggested['ar']);
                         } else {
-                          list.add(amenity);
+                          list.add(suggested);
                         }
                         amenitiesNotifier.value = list;
                       },
@@ -87,7 +94,7 @@ class AmenitiesRulesCard extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(20),
                               ),
                         child: Text(
-                          amenity,
+                          suggested['ar']!,
                           style: GoogleFonts.cairo(
                             color: isSelected ? Colors.white : Colors.black87,
                             fontSize: 12,
@@ -100,19 +107,31 @@ class AmenitiesRulesCard extends StatelessWidget {
                     );
                   }).toList(),
                 ),
-                if (amenities.any((a) => !_suggestedAmenities.contains(a)))
+                if (amenities.any(
+                  (a) => !_suggestedAmenities.any((s) => s['ar'] == a['ar']),
+                ))
                   Padding(
-                    padding: const EdgeInsets.only(top: 10),
+                    padding: const EdgeInsets.only(top: 15),
                     child: Wrap(
                       spacing: 8,
+                      runSpacing: 8,
                       children: amenities
-                          .where((a) => !_suggestedAmenities.contains(a))
+                          .where(
+                            (a) => !_suggestedAmenities.any(
+                              (s) => s['ar'] == a['ar'],
+                            ),
+                          )
                           .map((a) {
                             return Chip(
-                              label: Text(a, style: GoogleFonts.cairo()),
+                              label: Text(
+                                '${a['ar']} | ${a['en']}',
+                                style: GoogleFonts.cairo(fontSize: 11),
+                              ),
                               deleteIcon: const Icon(Icons.close, size: 16),
                               onDeleted: () {
-                                final list = List<String>.from(amenities);
+                                final list = List<Map<String, dynamic>>.from(
+                                  amenities,
+                                );
                                 list.remove(a);
                                 amenitiesNotifier.value = list;
                               },
@@ -130,31 +149,37 @@ class AmenitiesRulesCard extends StatelessWidget {
           },
         ),
         Padding(
-          padding: const EdgeInsets.only(top: 10),
-          child: DynamicAddField(
-            controller: customAmenityController,
-            hint: 'أضف مميزة أخرى...',
-            onAdd: (val) {
-              final list = List<String>.from(amenitiesNotifier.value);
-              list.add(val);
+          padding: const EdgeInsets.only(top: 20),
+          child: BilingualAddField(
+            arController: customAmenityController,
+            enController: customAmenityEnController,
+            arHint: 'اسم الميزة بالعربي',
+            enHint: 'Amenity name in English',
+            onAdd: (ar, en) {
+              final list = List<Map<String, dynamic>>.from(
+                amenitiesNotifier.value,
+              );
+              list.add({'ar': ar, 'en': en});
               amenitiesNotifier.value = list;
             },
           ),
         ),
-        const Divider(height: 30),
-        const SectionLabel('القواعد والشروط ⚠️'),
+        const Divider(height: 40),
+        SectionLabel(context.loc.rulesAndConditions),
         const SizedBox(height: 10),
-        DynamicAddField(
-          controller: customRuleController,
-          hint: 'أضف قاعدة جديدة (مثال: ممنوع التدخين)...',
-          onAdd: (val) {
-            final list = List<String>.from(rulesNotifier.value);
-            list.add(val);
+        BilingualAddField(
+          arController: customRuleController,
+          enController: customRuleEnController,
+          arHint: 'القاعدة بالعربي (مثال: ممنوع التدخين)',
+          enHint: 'Rule in English (e.g. No smoking)',
+          onAdd: (ar, en) {
+            final list = List<Map<String, dynamic>>.from(rulesNotifier.value);
+            list.add({'ar': ar, 'en': en});
             rulesNotifier.value = list;
           },
         ),
-        const SizedBox(height: 10),
-        ValueListenableBuilder<List<String>>(
+        const SizedBox(height: 15),
+        ValueListenableBuilder<List<Map<String, dynamic>>>(
           valueListenable: rulesNotifier,
           builder: (context, rules, child) {
             return Wrap(
@@ -162,10 +187,15 @@ class AmenitiesRulesCard extends StatelessWidget {
               runSpacing: 8,
               children: rules.map((rule) {
                 return Chip(
-                  label: Text(rule, style: GoogleFonts.cairo()),
+                  label: Text(
+                    '${rule['ar']} | ${rule['en']}',
+                    style: GoogleFonts.cairo(fontSize: 11),
+                  ),
                   deleteIcon: const Icon(Icons.close, size: 16),
                   onDeleted: () {
-                    final list = List<String>.from(rulesNotifier.value);
+                    final list = List<Map<String, dynamic>>.from(
+                      rulesNotifier.value,
+                    );
                     list.remove(rule);
                     rulesNotifier.value = list;
                   },

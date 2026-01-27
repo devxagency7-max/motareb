@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:admin_motareb/core/utils/loc_extension.dart';
 import 'add_property_helpers.dart';
 
 class AvailableUnitsCard extends StatefulWidget {
@@ -185,7 +186,7 @@ class _AvailableUnitsCardState extends State<AvailableUnitsCard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SectionLabel('نظام الحجز والمرافق 🛏️', fontSize: 13),
+                  SectionLabel(context.loc.bookingSystem, fontSize: 13),
                   const SizedBox(height: 8),
                   // Booking Mode Logic
                   ValueListenableBuilder<String>(
@@ -210,14 +211,14 @@ class _AvailableUnitsCardState extends State<AvailableUnitsCard> {
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
                             ),
-                            items: const [
+                            items: [
                               DropdownMenuItem(
                                 value: 'unit',
-                                child: Text('نظام الوحدات (بالغرفة)'),
+                                child: Text(context.loc.unitSystem),
                               ),
                               DropdownMenuItem(
                                 value: 'bed',
-                                child: Text('نظام السراير (بالسرير)'),
+                                child: Text(context.loc.bedSystem),
                               ),
                             ],
                             onChanged: (val) {
@@ -237,7 +238,7 @@ class _AvailableUnitsCardState extends State<AvailableUnitsCard> {
             SizedBox(
               width: 90,
               child: CustomTextField(
-                label: 'الحمامات',
+                label: context.loc.bathrooms,
                 hint: '1',
                 controller: widget.bathroomsController,
                 keyboardType: TextInputType.number,
@@ -281,7 +282,7 @@ class _AvailableUnitsCardState extends State<AvailableUnitsCard> {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'في هذا النظام، يتم حساب السعر بناءً على السرير الواحد. السعر الإجمالي للعقار سيتم تقسيمه على عدد السراير.',
+                  context.loc.bedModeDescription,
                   style: GoogleFonts.cairo(
                     fontSize: 12,
                     color: Colors.blue.shade800,
@@ -296,8 +297,8 @@ class _AvailableUnitsCardState extends State<AvailableUnitsCard> {
           children: [
             Expanded(
               child: CustomTextField(
-                label: 'عدد السراير الكلي',
-                hint: 'مثال: 6',
+                label: context.loc.totalBedsCount,
+                hint: '6',
                 controller: widget.totalBedsController,
                 keyboardType: TextInputType.number,
                 icon: Icons.bed,
@@ -307,8 +308,8 @@ class _AvailableUnitsCardState extends State<AvailableUnitsCard> {
             const SizedBox(width: 10),
             Expanded(
               child: CustomTextField(
-                label: 'عدد الغرف',
-                hint: 'مثال: 2',
+                label: context.loc.roomsCount,
+                hint: '2',
                 controller: widget.apartmentRoomsCountController,
                 keyboardType: TextInputType.number,
                 icon: Icons.meeting_room,
@@ -318,8 +319,8 @@ class _AvailableUnitsCardState extends State<AvailableUnitsCard> {
         ),
         const SizedBox(height: 15),
         CustomTextField(
-          label: 'نوع الغرف (وصف عام)',
-          hint: 'مثال: غرف مزدوجة، غرف مشتركة',
+          label: context.loc.roomTypeDescription,
+          hint: 'Shared rooms, double rooms...',
           controller: widget.roomTypeController,
           icon: Icons.description,
         ),
@@ -333,7 +334,7 @@ class _AvailableUnitsCardState extends State<AvailableUnitsCard> {
             final bedPrice = (totalBeds > 0) ? price / totalBeds : 0.0;
 
             return Text(
-              'سعر السرير المتوقع: ${bedPrice.toStringAsFixed(0)} ج.م',
+              '${context.loc.expectedBedPrice} ${bedPrice.toStringAsFixed(0)} ${context.loc.currency}',
               style: GoogleFonts.cairo(
                 color: const Color(0xFF39BB5E),
                 fontWeight: FontWeight.bold,
@@ -365,7 +366,7 @@ class _AvailableUnitsCardState extends State<AvailableUnitsCard> {
           ),
           child: SwitchListTile(
             title: Text(
-              'حجز الشقة بالكامل فقط 🏠',
+              context.loc.fullApartmentBooking,
               style: GoogleFonts.cairo(
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
@@ -375,7 +376,7 @@ class _AvailableUnitsCardState extends State<AvailableUnitsCard> {
               ),
             ),
             subtitle: Text(
-              'عند التفعيل، لن يتمكن الطالب من اختيار غرف محددة',
+              context.loc.fullApartmentSubtitle,
               style: GoogleFonts.cairo(fontSize: 11, color: Colors.grey),
             ),
             value: widget.isFullApartmentNotifier.value,
@@ -392,239 +393,231 @@ class _AvailableUnitsCardState extends State<AvailableUnitsCard> {
         const SizedBox(height: 15),
 
         // Removed the check: if (!widget.isFullApartmentNotifier.value) ...[
-          const SectionLabel('تفاصيل الغرف', fontSize: 15),
-          if (widget.isFullApartmentNotifier.value)
-             Padding(
-                padding: const EdgeInsets.only(bottom: 10, top: 5),
-                child: Text(
-                  'ملاحظة: هذه التفاصيل ستعرض للمستخدم للعلم فقط، الحجز سيكون للشقة بالكامل',
-                  style: GoogleFonts.cairo(fontSize: 12, color: Colors.orange),
-                ),
-             ),
-          const SizedBox(height: 10),
-          ValueListenableBuilder<List<Map<String, dynamic>>>(
-            valueListenable: widget.roomsNotifier,
-            builder: (context, rooms, child) {
-              return Column(
-                children: [
-                  if (rooms.isEmpty)
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: Colors.grey.shade300,
-                          style: BorderStyle.solid,
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.meeting_room_outlined,
-                            size: 40,
-                            color: Colors.grey.shade400,
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            'لا توجد غرف مضافة بعد',
-                            style: GoogleFonts.cairo(
-                              color: Colors.grey.shade600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  else
-                    ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: rooms.length,
-                      separatorBuilder: (c, i) => const SizedBox(height: 10),
-                      itemBuilder: (context, index) {
-                        final room = rooms[index];
-                        String label = 'غرفة مخصصة';
-                        final type = room['type'];
-                        if (type == 'Single') {
-                          label = 'غرفة فردية (سنجل)';
-                        } else if (type == 'Double') {
-                          label = 'غرفة مزدوجة (2 سرير)';
-                        } else if (type == 'Triple') {
-                          label = 'غرفة ثلاثية (3 سراير)';
-                        }
-
-                        final beds = room['beds'] ?? 0;
-                        final price = room['price'] ?? 0.0;
-                        final bedPrice = room['bedPrice'] ?? 0.0;
-
-                        return Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 5,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: const Color(
-                                    0xFF39BB5E,
-                                  ).withOpacity(0.1),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.bed,
-                                  color: Color(0xFF39BB5E),
-                                  size: 20,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      label,
-                                      style: GoogleFonts.cairo(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                    Text(
-                                      'عدد السراير: $beds',
-                                      style: GoogleFonts.cairo(
-                                        color: Colors.grey,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Wrap(
-                                      crossAxisAlignment:
-                                          WrapCrossAlignment.center,
-                                      spacing: 8,
-                                      runSpacing: 4,
-                                      children: [
-                                        Text(
-                                          'الغرفة: $price ج.م',
-                                          style: GoogleFonts.cairo(
-                                            color: const Color(0xFF008695),
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        Container(
-                                          height: 10,
-                                          width: 1,
-                                          color: Colors.grey,
-                                        ),
-                                        Text(
-                                          'السرير: $bedPrice ج.م',
-                                          style: GoogleFonts.cairo(
-                                            color: Colors.orange.shade700,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.edit,
-                                  color: Colors.blue,
-                                ),
-                                onPressed: () =>
-                                    _editRoomDetails(context, index, room),
-                              ),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.delete_outline,
-                                  color: Colors.red,
-                                ),
-                                onPressed: () => _removeRoom(index),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  const SizedBox(height: 15),
-                  GestureDetector(
-                    onTap: () => _addRoom(context),
-                    child: Container(
-                      width: double.infinity,
-                      height: 45,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: const Color(0xFF39BB5E)),
-                        borderRadius: BorderRadius.circular(10),
-                        color: const Color(0xFF39BB5E).withOpacity(0.05),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.add, color: Color(0xFF39BB5E)),
-                          const SizedBox(width: 5),
-                          Text(
-                            'إضافة غرفة',
-                            style: GoogleFonts.cairo(
-                              color: const Color(0xFF39BB5E),
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-          const SizedBox(height: 15),
-
-          if (widget.isFullApartmentNotifier.value)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.grey.shade400),
-              ),
-              child: Column(
-                children: [
-                  const Icon(
-                    Icons.home_work_outlined,
-                    size: 50,
-                    color: Colors.grey,
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'تم تفعيل وضع "حجز الشقة بالكامل"',
-                    style: GoogleFonts.cairo(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade700,
-                    ),
-                  ),
-                  Text(
-                    'السعر المعروض للعميل سيكون سعر العقار الكلي',
-                    style: GoogleFonts.cairo(fontSize: 12, color: Colors.grey),
-                  ),
-                ],
-              ),
+        SectionLabel(context.loc.roomDetails, fontSize: 15),
+        if (widget.isFullApartmentNotifier.value)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10, top: 5),
+            child: Text(
+              context.loc.roomDetailsNote,
+              style: GoogleFonts.cairo(fontSize: 12, color: Colors.orange),
             ),
-        ],
-      
+          ),
+        const SizedBox(height: 10),
+        ValueListenableBuilder<List<Map<String, dynamic>>>(
+          valueListenable: widget.roomsNotifier,
+          builder: (context, rooms, child) {
+            return Column(
+              children: [
+                if (rooms.isEmpty)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: Colors.grey.shade300,
+                        style: BorderStyle.solid,
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.meeting_room_outlined,
+                          size: 40,
+                          color: Colors.grey.shade400,
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          'لا توجد غرف مضافة بعد',
+                          style: GoogleFonts.cairo(color: Colors.grey.shade600),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: rooms.length,
+                    separatorBuilder: (c, i) => const SizedBox(height: 10),
+                    itemBuilder: (context, index) {
+                      final room = rooms[index];
+                      String label = context.loc.customRoom;
+                      final type = room['type'];
+                      if (type == 'Single') {
+                        label = context.loc.singleRoom;
+                      } else if (type == 'Double') {
+                        label = context.loc.doubleRoom;
+                      } else if (type == 'Triple') {
+                        label = context.loc.tripleRoom;
+                      }
+
+                      final beds = room['beds'] ?? 0;
+                      final price = room['price'] ?? 0.0;
+                      final bedPrice = room['bedPrice'] ?? 0.0;
+
+                      return Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 5,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF39BB5E).withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.bed,
+                                color: Color(0xFF39BB5E),
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    label,
+                                    style: GoogleFonts.cairo(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${context.loc.numBeds}: $beds',
+                                    style: GoogleFonts.cairo(
+                                      color: Colors.grey,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Wrap(
+                                    crossAxisAlignment:
+                                        WrapCrossAlignment.center,
+                                    spacing: 8,
+                                    runSpacing: 4,
+                                    children: [
+                                      Text(
+                                        '${context.loc.unitSystem}: $price ${context.loc.currency}',
+                                        style: GoogleFonts.cairo(
+                                          color: const Color(0xFF008695),
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Container(
+                                        height: 10,
+                                        width: 1,
+                                        color: Colors.grey,
+                                      ),
+                                      Text(
+                                        '${context.loc.bedSystem}: $bedPrice ${context.loc.currency}',
+                                        style: GoogleFonts.cairo(
+                                          color: Colors.orange.shade700,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.edit, color: Colors.blue),
+                              onPressed: () =>
+                                  _editRoomDetails(context, index, room),
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.delete_outline,
+                                color: Colors.red,
+                              ),
+                              onPressed: () => _removeRoom(index),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                const SizedBox(height: 15),
+                GestureDetector(
+                  onTap: () => _addRoom(context),
+                  child: Container(
+                    width: double.infinity,
+                    height: 45,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: const Color(0xFF39BB5E)),
+                      borderRadius: BorderRadius.circular(10),
+                      color: const Color(0xFF39BB5E).withOpacity(0.05),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.add, color: Color(0xFF39BB5E)),
+                        const SizedBox(width: 5),
+                        Text(
+                          context.loc.addRoom,
+                          style: GoogleFonts.cairo(
+                            color: const Color(0xFF39BB5E),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+        const SizedBox(height: 15),
+
+        if (widget.isFullApartmentNotifier.value)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.grey.shade400),
+            ),
+            child: Column(
+              children: [
+                const Icon(
+                  Icons.home_work_outlined,
+                  size: 50,
+                  color: Colors.grey,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'تم تفعيل وضع "حجز الشقة بالكامل"',
+                  style: GoogleFonts.cairo(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+                Text(
+                  'السعر المعروض للعميل سيكون سعر العقار الكلي',
+                  style: GoogleFonts.cairo(fontSize: 12, color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+      ],
     );
   }
 }
@@ -711,7 +704,7 @@ class _RoomEditDialogState extends State<RoomEditDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(
-        'تعديل تفاصيل الغرفة',
+        context.loc.editRoom,
         style: GoogleFonts.cairo(fontWeight: FontWeight.bold),
       ),
       content: SingleChildScrollView(
@@ -721,7 +714,7 @@ class _RoomEditDialogState extends State<RoomEditDialog> {
               controller: _bedsController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                labelText: 'عدد السراير',
+                labelText: context.loc.numBeds,
                 suffixIcon: const Icon(Icons.bed),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -733,8 +726,8 @@ class _RoomEditDialogState extends State<RoomEditDialog> {
               controller: _roomPriceController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                labelText: 'سعر الغرفة بالكامل',
-                suffixText: 'ج.م',
+                labelText: context.loc.roomPrice,
+                suffixText: context.loc.currency,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -745,8 +738,8 @@ class _RoomEditDialogState extends State<RoomEditDialog> {
               controller: _bedPriceController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                labelText: 'سعر السرير الواحد',
-                suffixText: 'ج.م',
+                labelText: context.loc.bedPrice,
+                suffixText: context.loc.currency,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -760,7 +753,10 @@ class _RoomEditDialogState extends State<RoomEditDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text('إلغاء', style: GoogleFonts.cairo(color: Colors.grey)),
+          child: Text(
+            context.loc.cancel,
+            style: GoogleFonts.cairo(color: Colors.grey),
+          ),
         ),
         TextButton(
           onPressed: () {
@@ -775,7 +771,7 @@ class _RoomEditDialogState extends State<RoomEditDialog> {
             Navigator.pop(context);
           },
           child: Text(
-            'حفظ التعديلات',
+            context.loc.save,
             style: GoogleFonts.cairo(
               color: const Color(0xFF39BB5E),
               fontWeight: FontWeight.bold,
@@ -847,12 +843,12 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
           ),
           const SizedBox(height: 20),
           Text(
-            'إضافة غرفة جديدة',
+            context.loc.addNewRoom,
             style: GoogleFonts.cairo(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 20),
           Text(
-            'نوع الغرفة',
+            context.loc.roomType,
             style: GoogleFonts.cairo(fontSize: 14, color: Colors.grey),
           ),
           const SizedBox(height: 10),
@@ -861,10 +857,10 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
             children: _types.map((type) {
               final isSelected = _selectedType == type;
               String label = type;
-              if (type == 'Single') label = 'سنجل';
-              if (type == 'Double') label = 'مزدوجة';
-              if (type == 'Triple') label = 'ثلاثية';
-              if (type == 'Custom') label = 'تخصيص عدد';
+              if (type == 'Single') label = context.loc.single;
+              if (type == 'Double') label = context.loc.double;
+              if (type == 'Triple') label = context.loc.triple;
+              if (type == 'Custom') label = context.loc.custom;
 
               return ChoiceChip(
                 label: Text(label),
@@ -887,7 +883,7 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
           ),
           const SizedBox(height: 20),
           Text(
-            'عدد السراير بالغرفة',
+            context.loc.bedsInRoom,
             style: GoogleFonts.cairo(fontSize: 14, color: Colors.grey),
           ),
           const SizedBox(height: 10),
@@ -895,7 +891,7 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
             controller: _bedsController,
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
-              hintText: 'أدخل عدد السراير',
+              hintText: context.loc.enterNumBeds,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
@@ -926,7 +922,7 @@ class _AddRoomSheetState extends State<AddRoomSheet> {
                 });
               },
               child: Text(
-                'إضافة',
+                context.loc.add,
                 style: GoogleFonts.cairo(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,

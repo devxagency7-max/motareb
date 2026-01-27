@@ -12,26 +12,48 @@ class AdminUniversitiesScreen extends StatefulWidget {
 
 class _AdminUniversitiesScreenState extends State<AdminUniversitiesScreen> {
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _nameEnController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  void _showUniversityDialog({String? id, String? currentName}) {
-    _nameController.text = currentName ?? '';
+  void _showUniversityDialog({String? id, Map<String, dynamic>? data}) {
+    _nameController.text = data?['name'] ?? '';
+    _nameEnController.text = data?['nameEn'] ?? '';
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          id == null ? 'إضافة جامعة' : 'تعديل اسم الجامعة',
+          id == null ? 'إضافة جامعة' : 'تعديل الجامعة',
           style: GoogleFonts.cairo(fontWeight: FontWeight.bold),
           textAlign: TextAlign.right,
         ),
-        content: TextField(
-          controller: _nameController,
-          decoration: InputDecoration(
-            labelText: 'اسم الجامعة',
-            labelStyle: GoogleFonts.cairo(),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-          ),
-          textAlign: TextAlign.right,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _nameController,
+              decoration: InputDecoration(
+                labelText: 'اسم الجامعة (عربي)',
+                labelStyle: GoogleFonts.cairo(),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              textAlign: TextAlign.right,
+            ),
+            const SizedBox(height: 15),
+            TextField(
+              controller: _nameEnController,
+              decoration: InputDecoration(
+                labelText: 'University Name (EN)',
+                labelStyle: GoogleFonts.cairo(),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              textAlign: TextAlign.left,
+              textDirection: TextDirection.ltr,
+            ),
+          ],
         ),
         actions: [
           TextButton(
@@ -40,18 +62,21 @@ class _AdminUniversitiesScreenState extends State<AdminUniversitiesScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
-              if (_nameController.text.trim().isNotEmpty) {
+              final nameAr = _nameController.text.trim();
+              final nameEn = _nameEnController.text.trim();
+              if (nameAr.isNotEmpty) {
+                final Map<String, dynamic> updateData = {
+                  'name': nameAr,
+                  'nameEn': nameEn.isEmpty ? nameAr : nameEn,
+                };
                 if (id == null) {
-                  // Add new
-                  await _firestore.collection('universities').add({
-                    'name': _nameController.text.trim(),
-                    'createdAt': FieldValue.serverTimestamp(),
-                  });
+                  updateData['createdAt'] = FieldValue.serverTimestamp();
+                  await _firestore.collection('universities').add(updateData);
                 } else {
-                  // Update existing
-                  await _firestore.collection('universities').doc(id).update({
-                    'name': _nameController.text.trim(),
-                  });
+                  await _firestore
+                      .collection('universities')
+                      .doc(id)
+                      .update(updateData);
                 }
                 if (mounted) Navigator.pop(context);
               }
@@ -193,15 +218,20 @@ class _AdminUniversitiesScreenState extends State<AdminUniversitiesScreen> {
                         fontSize: 16,
                       ),
                     ),
+                    subtitle: Text(
+                      data['nameEn'] ?? data['name'] ?? '',
+                      style: GoogleFonts.cairo(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                    ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
                           icon: const Icon(Icons.edit, color: Colors.amber),
-                          onPressed: () => _showUniversityDialog(
-                            id: doc.id,
-                            currentName: data['name'],
-                          ),
+                          onPressed: () =>
+                              _showUniversityDialog(id: doc.id, data: data),
                         ),
                         IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
@@ -222,6 +252,7 @@ class _AdminUniversitiesScreenState extends State<AdminUniversitiesScreen> {
   @override
   void dispose() {
     _nameController.dispose();
+    _nameEnController.dispose();
     super.dispose();
   }
 }

@@ -13,8 +13,9 @@ class MainInfoCard extends StatelessWidget {
   final TextEditingController featuredLabelController;
   final TextEditingController featuredLabelEnController;
   final ValueNotifier<String> governorateNotifier;
-  final ValueNotifier<List<String>> universitiesNotifier;
+  final ValueNotifier<List<Map<String, dynamic>>> universitiesNotifier;
   final TextEditingController customUniversityController;
+  final TextEditingController customUniversityEnController;
 
   const MainInfoCard({
     super.key,
@@ -29,6 +30,7 @@ class MainInfoCard extends StatelessWidget {
     required this.governorateNotifier,
     required this.universitiesNotifier,
     required this.customUniversityController,
+    required this.customUniversityEnController,
   });
 
   static const List<String> _governorates = [
@@ -72,6 +74,8 @@ class MainInfoCard extends StatelessWidget {
           hint: 'مثال: ستوديو فاخر بجوار الجامعة',
           controller: titleController,
           icon: Icons.title,
+          maxLines: null,
+          minLines: 1,
         ),
         const SizedBox(height: 10),
         CustomTextField(
@@ -80,6 +84,8 @@ class MainInfoCard extends StatelessWidget {
           controller: titleEnController,
           icon: Icons.title,
           textDirection: TextDirection.ltr,
+          maxLines: null,
+          minLines: 1,
         ),
         const SizedBox(height: 15),
         CustomTextField(
@@ -139,7 +145,8 @@ class MainInfoCard extends StatelessWidget {
           hint: 'الشارع، الحي، علامة مميزة...',
           controller: locationController,
           icon: Icons.location_on_outlined,
-          maxLines: 2,
+          maxLines: null,
+          minLines: 2,
         ),
         const SizedBox(height: 10),
         CustomTextField(
@@ -147,13 +154,15 @@ class MainInfoCard extends StatelessWidget {
           hint: 'Street, District, Landmark...',
           controller: locationEnController,
           icon: Icons.location_on_outlined,
-          maxLines: 2,
+          maxLines: null,
+          minLines: 2,
           textDirection: TextDirection.ltr,
         ),
         const SizedBox(height: 15),
         UniversitiesSelectorSection(
           selectedUniversitiesNotifier: universitiesNotifier,
           customUniversityController: customUniversityController,
+          customUniversityEnController: customUniversityEnController,
         ),
         const SizedBox(height: 15),
         CustomTextField(
@@ -161,6 +170,8 @@ class MainInfoCard extends StatelessWidget {
           hint: 'مثال: خصم خاص، فرصة، قريب جداً',
           controller: featuredLabelController,
           icon: Icons.stars_rounded,
+          maxLines: null,
+          minLines: 1,
         ),
         const SizedBox(height: 10),
         CustomTextField(
@@ -169,6 +180,8 @@ class MainInfoCard extends StatelessWidget {
           controller: featuredLabelEnController,
           icon: Icons.stars_rounded,
           textDirection: TextDirection.ltr,
+          maxLines: null,
+          minLines: 1,
         ),
       ],
     );

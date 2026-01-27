@@ -44,8 +44,11 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
   final _featuredLabelEnController = TextEditingController(); // NEW
 
   final _customRuleController = TextEditingController();
+  final _customRuleEnController = TextEditingController();
   final _customAmenityController = TextEditingController();
+  final _customAmenityEnController = TextEditingController();
   final _customUniversityController = TextEditingController();
+  final _customUniversityEnController = TextEditingController();
 
   // --- Booking Modes State ---
   final ValueNotifier<String> _bookingModeNotifier = ValueNotifier('unit');
@@ -62,16 +65,18 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
   final ValueNotifier<String?> _idErrorNotifier = ValueNotifier(null);
   final ValueNotifier<bool> _isCheckingIdNotifier = ValueNotifier(false);
 
-  final ValueNotifier<List<String>> _amenitiesNotifier = ValueNotifier([]);
-  final ValueNotifier<List<String>> _rulesNotifier = ValueNotifier([]);
+  final ValueNotifier<List<Map<String, dynamic>>> _amenitiesNotifier =
+      ValueNotifier([]);
+  final ValueNotifier<List<Map<String, dynamic>>> _rulesNotifier =
+      ValueNotifier([]);
 
   final ValueNotifier<List<String>> _selectedUnitTypesNotifier = ValueNotifier(
     [],
   );
   final ValueNotifier<String> _selectedGenderNotifier = ValueNotifier('male');
   final ValueNotifier<List<String>> _paymentMethodsNotifier = ValueNotifier([]);
-  final ValueNotifier<List<String>> _selectedUniversitiesNotifier =
-      ValueNotifier([]);
+  final ValueNotifier<List<Map<String, dynamic>>>
+  _selectedUniversitiesNotifier = ValueNotifier([]);
   final ValueNotifier<String> _selectedGovernorateNotifier = ValueNotifier(
     'بني سويف',
   );
@@ -153,16 +158,27 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
     _featuredLabelController.text = p.featuredLabel ?? '';
     _featuredLabelEnController.text = p.featuredLabelEn ?? '';
 
-    _imagesNotifier.value = List.from(p.images);
+    _imagesNotifier.value = List<String>.from(p.images);
     _videoUrlNotifier.value = p.videoUrl;
 
-    _amenitiesNotifier.value = List.from(p.amenities);
-    _rulesNotifier.value = List.from(p.rules);
+    _amenitiesNotifier.value = p.amenities.map<Map<String, dynamic>>((e) {
+      if (e is Map) return Map<String, dynamic>.from(e);
+      return {'ar': e.toString(), 'en': e.toString()};
+    }).toList();
+    _rulesNotifier.value = p.rules.map<Map<String, dynamic>>((e) {
+      if (e is Map) return Map<String, dynamic>.from(e);
+      return {'ar': e.toString(), 'en': e.toString()};
+    }).toList();
 
     _selectedGenderNotifier.value = p.gender ?? 'male';
     _selectedGovernorateNotifier.value = p.governorate ?? 'بني سويف';
     _paymentMethodsNotifier.value = List.from(p.paymentMethods);
-    _selectedUniversitiesNotifier.value = List.from(p.universities);
+    _selectedUniversitiesNotifier.value = p.universities
+        .map<Map<String, dynamic>>((e) {
+          if (e is Map) return Map<String, dynamic>.from(e);
+          return {'ar': e.toString(), 'en': e.toString()};
+        })
+        .toList();
 
     List<String> types = [];
     if (p.unitTypes.isNotEmpty) {
@@ -202,8 +218,11 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
     _featuredLabelController.dispose();
     _featuredLabelEnController.dispose();
     _customRuleController.dispose();
+    _customRuleEnController.dispose();
     _customAmenityController.dispose();
+    _customAmenityEnController.dispose();
     _customUniversityController.dispose();
+    _customUniversityEnController.dispose();
     _bookingModeNotifier.dispose();
     _isFullApartmentNotifier.dispose();
     _totalBedsController.dispose();
@@ -565,6 +584,7 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
                 governorateNotifier: _selectedGovernorateNotifier,
                 universitiesNotifier: _selectedUniversitiesNotifier,
                 customUniversityController: _customUniversityController,
+                customUniversityEnController: _customUniversityEnController,
               ),
               const SizedBox(height: 20),
 
@@ -602,7 +622,9 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
                 amenitiesNotifier: _amenitiesNotifier,
                 rulesNotifier: _rulesNotifier,
                 customAmenityController: _customAmenityController,
+                customAmenityEnController: _customAmenityEnController,
                 customRuleController: _customRuleController,
+                customRuleEnController: _customRuleEnController,
               ),
               const SizedBox(height: 30),
 

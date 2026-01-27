@@ -12,12 +12,12 @@ class Property {
   final bool isVerified;
   final bool isNew;
   final double rating;
-  final List<String> amenities; // Renamed from tags to match Admin usage
+  final List<dynamic> amenities; // Can be String or Map<String, String>
   final String status; // Added
   final DateTime createdAt; // Added
 
   final double? discountPrice;
-  final List<String> rules;
+  final List<dynamic> rules;
   final String? featuredLabel;
   final String? featuredLabelEn;
 
@@ -34,7 +34,7 @@ class Property {
   final String? governorate;
   final String? gender;
   final List<String> paymentMethods;
-  final List<String> universities;
+  final List<dynamic> universities;
   final int bedsCount;
   final int roomsCount;
   final int bathroomsCount; // Added
@@ -49,7 +49,16 @@ class Property {
   final List<Map<String, dynamic>> rooms; // Added for new units structure
 
   // Helpers
-  bool get hasAC => amenities.contains('ac') || amenities.contains('تكييف');
+  bool get hasAC {
+    return amenities.any((a) {
+      if (a is String) return a.toLowerCase() == 'ac' || a == 'تكييف';
+      if (a is Map)
+        return a['ar'] == 'تكييف' ||
+            a['en']?.toLowerCase() == 'air conditioning';
+      return false;
+    });
+  }
+
   bool get isBed => unitTypes.contains('bed') || type == 'سرير';
   bool get isRoom => unitTypes.contains('room') || type == 'غرفة';
   bool get isStudio => unitTypes.contains('studio') || type == 'ستوديو';
@@ -128,14 +137,8 @@ class Property {
           : false,
       rating: (map['rating'] as num?)?.toDouble() ?? 0.0,
       ratingCount: (map['ratingCount'] as num?)?.toInt() ?? 0,
-      amenities:
-          (map['amenities'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          [],
-      rules:
-          (map['rules'] as List<dynamic>?)?.map((e) => e.toString()).toList() ??
-          [],
+      amenities: map['amenities'] as List<dynamic>? ?? [],
+      rules: map['rules'] as List<dynamic>? ?? [],
       status: map['status'] ?? 'pending',
       createdAt: map['createdAt'] != null
           ? (map['createdAt'] as Timestamp).toDate()
@@ -151,11 +154,7 @@ class Property {
               ?.map((e) => e.toString())
               .toList() ??
           [],
-      universities:
-          (map['universities'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          [],
+      universities: (map['universities'] as List<dynamic>?) ?? [],
       bedsCount: (map['bedsCount'] as num?)?.toInt() ?? 0,
       roomsCount: (map['roomsCount'] as num?)?.toInt() ?? 0,
       singleRoomsCount: (map['singleRoomsCount'] as num?)?.toInt() ?? 0,
