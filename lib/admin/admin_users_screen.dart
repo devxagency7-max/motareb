@@ -34,7 +34,9 @@ class AdminUsersScreen extends StatelessWidget {
         ),
       ),
       body: Container(
-        decoration: const BoxDecoration(color: Color(0xFFF5F7F9)),
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+        ),
         child: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance.collection('users').snapshots(),
           builder: (context, snapshot) {
@@ -76,15 +78,22 @@ class AdminUsersScreen extends StatelessWidget {
                   child: Container(
                     margin: const EdgeInsets.only(bottom: 12),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).cardTheme.color,
                       borderRadius: BorderRadius.circular(15),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.04),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                      boxShadow: Theme.of(context).brightness == Brightness.dark
+                          ? []
+                          : [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.04),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                      border: Border.all(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? const Color(0xFF2F3640)
+                            : Colors.transparent,
+                      ),
                     ),
                     child: Material(
                       color: Colors.transparent,
@@ -140,7 +149,9 @@ class AdminUsersScreen extends StatelessWidget {
                                       style: GoogleFonts.cairo(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 15,
-                                        color: Colors.black87,
+                                        color: Theme.of(
+                                          context,
+                                        ).textTheme.bodyLarge?.color,
                                       ),
                                     ),
                                     Text(
@@ -252,9 +263,14 @@ class _UserDetailsSheet extends StatelessWidget {
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+        border: Border.all(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? const Color(0xFF2F3640)
+              : Colors.transparent,
+        ),
       ),
       child: Column(
         children: [
@@ -278,14 +294,14 @@ class _UserDetailsSheet extends StatelessWidget {
                   Center(
                     child: Column(
                       children: [
-                        _buildAvatar(photoUrl),
+                        _buildAvatar(photoUrl, context),
                         const SizedBox(height: 15),
                         Text(
                           displayName,
                           style: GoogleFonts.cairo(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: const Color(0xFF003D4D),
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -325,21 +341,25 @@ class _UserDetailsSheet extends StatelessWidget {
                     Icons.email_outlined,
                     'البريد الإلكتروني',
                     user['email'],
+                    context,
                   ),
                   _buildDetailTile(
                     Icons.perm_identity,
                     'رقم المعرف (UID)',
                     userId,
+                    context,
                   ),
                   _buildDetailTile(
                     Icons.category_outlined,
                     'نوع الحساب (Role)',
                     user['role'],
+                    context,
                   ),
                   _buildDetailTile(
                     Icons.login,
                     'طريقة التسجيل (Provider)',
                     user['provider'],
+                    context,
                   ),
 
                   const SizedBox(height: 30),
@@ -355,16 +375,19 @@ class _UserDetailsSheet extends StatelessWidget {
                     Icons.location_city,
                     'المحافظة',
                     user['governorate'],
+                    context,
                   ),
                   _buildDetailTile(
                     Icons.home_outlined,
                     'السكن / العنوان',
                     user['residence'],
+                    context,
                   ),
                   _buildDetailTile(
                     Icons.cake_outlined,
                     'تاريخ الميلاد',
                     user['birthDate'],
+                    context,
                   ),
 
                   const SizedBox(height: 30),
@@ -380,16 +403,19 @@ class _UserDetailsSheet extends StatelessWidget {
                     Icons.add_circle_outline,
                     'تاريخ الانضمام',
                     _formatTimestamp(user['createdAt']),
+                    context,
                   ),
                   _buildDetailTile(
                     Icons.history,
                     'آخر ظهور',
                     _formatTimestamp(user['lastLoginAt']),
+                    context,
                   ),
                   _buildDetailTile(
                     Icons.verified_outlined,
                     'تاريخ تقديم التوثيق',
                     _formatTimestamp(user['verificationSubmittedAt']),
+                    context,
                   ),
 
                   const SizedBox(height: 50),
@@ -402,7 +428,8 @@ class _UserDetailsSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildAvatar(String? url) {
+  Widget _buildAvatar(String? url, BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: const BoxDecoration(
@@ -413,10 +440,12 @@ class _UserDetailsSheet extends StatelessWidget {
       ),
       child: CircleAvatar(
         radius: 50,
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF1E2329) : Colors.white,
         child: CircleAvatar(
           radius: 47,
-          backgroundColor: Colors.grey.shade100,
+          backgroundColor: isDark
+              ? const Color(0xFF121212)
+              : Colors.grey.shade100,
           backgroundImage: (url != null && url.isNotEmpty)
               ? NetworkImage(url)
               : null,
@@ -461,7 +490,12 @@ class _UserDetailsSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailTile(IconData icon, String label, dynamic value) {
+  Widget _buildDetailTile(
+    IconData icon,
+    String label,
+    dynamic value,
+    BuildContext context,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
@@ -493,7 +527,7 @@ class _UserDetailsSheet extends StatelessWidget {
                   style: GoogleFonts.cairo(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
                   ),
                 ),
               ],

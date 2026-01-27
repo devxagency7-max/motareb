@@ -90,5 +90,7 @@
   "enterPropertyIdFirst": "Please enter property number first! ⚠️",
   "cannotUploadDuplicateId": "❌ Cannot upload: Serial already exists",
   "imageDeleteSuccess": "Image deleted successfully 🗑️",
-  "videoDeleteSuccess": "Video deleted successfully 🗑️"
+  "videoDeleteSuccess": "Video deleted successfully 🗑️",
+  "ads": "Ads",
+  "manageAds": "Manage Ads and Spaces"
 }

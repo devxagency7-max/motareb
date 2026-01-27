@@ -13,6 +13,7 @@ import 'admin_verification_screen.dart';
 import 'admin_contact_numbers_screen.dart';
 import 'package:admin_motareb/core/utils/loc_extension.dart';
 import 'package:admin_motareb/core/providers/locale_provider.dart';
+import 'package:admin_motareb/core/providers/theme_provider.dart';
 import 'package:provider/provider.dart';
 
 class AdminDashboard extends StatelessWidget {
@@ -21,19 +22,19 @@ class AdminDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7F9),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           context.loc.appTitle,
           style: GoogleFonts.cairo(
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: Theme.of(context).textTheme.bodyLarge?.color,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
+        iconTheme: Theme.of(context).appBarTheme.iconTheme,
         actions: [
           Consumer<LocaleProvider>(
             builder: (context, localeProvider, child) {
@@ -50,6 +51,21 @@ class AdminDashboard extends StatelessWidget {
                   localeProvider.setLocale(
                     isArabic ? const Locale('en') : const Locale('ar'),
                   );
+                },
+              );
+            },
+          ),
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, child) {
+              return IconButton(
+                icon: Icon(
+                  themeProvider.isDarkMode
+                      ? Icons.light_mode_rounded
+                      : Icons.dark_mode_rounded,
+                  color: const Color(0xFF008695),
+                ),
+                onPressed: () {
+                  themeProvider.toggleTheme();
                 },
               );
             },
@@ -261,6 +277,25 @@ class AdminDashboard extends StatelessWidget {
                       );
                     },
                   ),
+                  _buildDashboardCard(
+                    context,
+                    title: context.loc.ads,
+                    subtitle: context.loc.manageAds,
+                    icon: Icons.campaign_rounded,
+                    color: Colors.amber,
+                    onTap: () {
+                      // TODO: Implement Ads management screen
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            context.loc.ads + " - Coming Soon / قريباً",
+                            style: GoogleFonts.cairo(),
+                          ),
+                          backgroundColor: const Color(0xFF008695),
+                        ),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
@@ -283,15 +318,22 @@ class AdminDashboard extends StatelessWidget {
         onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).cardTheme.color,
             borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 5),
-              ),
-            ],
+            boxShadow: Theme.of(context).brightness == Brightness.dark
+                ? []
+                : [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+            border: Border.all(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? const Color(0xFF2F3640)
+                  : Colors.transparent,
+            ),
           ),
           child: SingleChildScrollView(
             child: Column(
@@ -312,7 +354,7 @@ class AdminDashboard extends StatelessWidget {
                   style: GoogleFonts.cairo(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
                   ),
                   textAlign: TextAlign.center,
                 ),

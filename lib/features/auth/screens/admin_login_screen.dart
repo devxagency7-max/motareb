@@ -34,7 +34,6 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
-      // Navigation is handled by auth state changes in main.dart
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -53,12 +52,15 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   @override
   Widget build(BuildContext context) {
     final isLoading = context.watch<AuthProvider>().isLoading;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF008695), Color(0xFF39BB5E)],
+            colors: isDark
+                ? [const Color(0xFF0F1115), const Color(0xFF1E2329)]
+                : [const Color(0xFF008695), const Color(0xFF39BB5E)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -69,11 +71,14 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
             child: FadeInUp(
               duration: const Duration(milliseconds: 600),
               child: Card(
-                elevation: 10,
+                elevation: isDark ? 0 : 10,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(25),
+                  side: isDark
+                      ? const BorderSide(color: Color(0xFF2F3640), width: 1)
+                      : BorderSide.none,
                 ),
-                color: Colors.white.withOpacity(0.95),
+                color: Theme.of(context).cardTheme.color?.withOpacity(0.95),
                 child: Padding(
                   padding: const EdgeInsets.all(32.0),
                   child: Form(
@@ -81,27 +86,25 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Logo or Icon
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.teal.shade50,
+                            color: const Color(0xFF008695).withOpacity(0.1),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
                             Icons.admin_panel_settings,
                             size: 60,
-                            color: Colors.teal,
+                            color: Color(0xFF008695),
                           ),
                         ),
                         const SizedBox(height: 24),
-
                         Text(
                           'تسجيل دخول المشرف',
                           style: GoogleFonts.cairo(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -113,24 +116,35 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                           ),
                         ),
                         const SizedBox(height: 32),
-
-                        // Email Field
                         TextFormField(
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
-                          style: GoogleFonts.cairo(),
+                          style: GoogleFonts.cairo(
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
+                          ),
                           decoration: InputDecoration(
                             labelText: 'البريد الإلكتروني',
-                            labelStyle: GoogleFonts.cairo(),
+                            labelStyle: GoogleFonts.cairo(
+                              color: isDark
+                                  ? Colors.grey.shade400
+                                  : Colors.grey.shade600,
+                            ),
                             prefixIcon: const Icon(Icons.email_outlined),
+                            filled: true,
+                            fillColor: isDark
+                                ? const Color(0xFF1E2329)
+                                : Colors.grey.shade50,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(15),
+                              borderSide: isDark
+                                  ? const BorderSide(color: Color(0xFF2F3640))
+                                  : BorderSide.none,
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(15),
-                              borderSide: BorderSide(
-                                color: Colors.grey.shade300,
-                              ),
+                              borderSide: isDark
+                                  ? const BorderSide(color: Color(0xFF2F3640))
+                                  : BorderSide.none,
                             ),
                           ),
                           validator: (value) {
@@ -141,16 +155,24 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                           },
                         ),
                         const SizedBox(height: 20),
-
-                        // Password Field
                         TextFormField(
                           controller: _passwordController,
                           obscureText: !_isPasswordVisible,
-                          style: GoogleFonts.cairo(),
+                          style: GoogleFonts.cairo(
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
+                          ),
                           decoration: InputDecoration(
                             labelText: 'كلمة المرور',
-                            labelStyle: GoogleFonts.cairo(),
+                            labelStyle: GoogleFonts.cairo(
+                              color: isDark
+                                  ? Colors.grey.shade400
+                                  : Colors.grey.shade600,
+                            ),
                             prefixIcon: const Icon(Icons.lock_outline),
+                            filled: true,
+                            fillColor: isDark
+                                ? const Color(0xFF1E2329)
+                                : Colors.grey.shade50,
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _isPasswordVisible
@@ -165,12 +187,15 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                             ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(15),
+                              borderSide: isDark
+                                  ? const BorderSide(color: Color(0xFF2F3640))
+                                  : BorderSide.none,
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(15),
-                              borderSide: BorderSide(
-                                color: Colors.grey.shade300,
-                              ),
+                              borderSide: isDark
+                                  ? const BorderSide(color: Color(0xFF2F3640))
+                                  : BorderSide.none,
                             ),
                           ),
                           validator: (value) {
@@ -181,8 +206,6 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                           },
                         ),
                         const SizedBox(height: 32),
-
-                        // Login Button
                         SizedBox(
                           width: double.infinity,
                           height: 55,

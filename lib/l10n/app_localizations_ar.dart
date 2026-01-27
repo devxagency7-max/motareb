@@ -286,4 +286,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get videoDeleteSuccess => 'تم حذف الفيديو بنجاح 🗑️';
+
+  @override
+  String get ads => 'الإعلانات';
+
+  @override
+  String get manageAds => 'إدارة الإعلانات والمساحات';
 }

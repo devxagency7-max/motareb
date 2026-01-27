@@ -29,20 +29,20 @@ class _AdminChatListScreenState extends State<AdminChatListScreen> {
     final chatProvider = context.read<ChatProvider>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7F9),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           'محادثات الدعم',
           style: GoogleFonts.cairo(
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: Theme.of(context).textTheme.bodyLarge?.color,
             fontSize: 22,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
+        iconTheme: Theme.of(context).appBarTheme.iconTheme,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(70),
           child: Padding(
@@ -50,9 +50,15 @@ class _AdminChatListScreenState extends State<AdminChatListScreen> {
             child: Container(
               height: 50,
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFF1E2329)
+                    : Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(15),
-                border: Border.all(color: Colors.grey.shade300),
+                border: Border.all(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? const Color(0xFF2F3640)
+                      : Colors.grey.shade300,
+                ),
               ),
               child: TextField(
                 controller: _searchController,
@@ -72,6 +78,9 @@ class _AdminChatListScreenState extends State<AdminChatListScreen> {
                           },
                         )
                       : null,
+                ),
+                style: GoogleFonts.cairo(
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
             ),
@@ -171,18 +180,22 @@ class _AdminChatListScreenState extends State<AdminChatListScreen> {
         child: Container(
           padding: const EdgeInsets.all(15),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).cardTheme.color,
             borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 15,
-                offset: const Offset(0, 5),
-              ),
-            ],
+            boxShadow: Theme.of(context).brightness == Brightness.dark
+                ? []
+                : [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 15,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
             border: hasUnread
                 ? Border.all(color: const Color(0xFF39BB5E), width: 1.5)
-                : null,
+                : (Theme.of(context).brightness == Brightness.dark
+                      ? Border.all(color: const Color(0xFF2F3640))
+                      : null),
           ),
           child: Row(
             children: [
@@ -238,7 +251,7 @@ class _AdminChatListScreenState extends State<AdminChatListScreen> {
                           style: GoogleFonts.cairo(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
-                            color: Colors.black87,
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -271,7 +284,7 @@ class _AdminChatListScreenState extends State<AdminChatListScreen> {
                             style: GoogleFonts.cairo(
                               fontSize: 14,
                               color: hasUnread
-                                  ? Colors.black87
+                                  ? Theme.of(context).textTheme.bodyLarge?.color
                                   : Colors.grey.shade600,
                               fontWeight: hasUnread
                                   ? FontWeight.w600

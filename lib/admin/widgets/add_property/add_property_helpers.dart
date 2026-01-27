@@ -26,20 +26,25 @@ class GlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(25),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-        border: Border.all(color: Colors.white),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+        border: Border.all(
+          color: isDark ? const Color(0xFF2F3640) : Colors.white,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,6 +82,7 @@ class CustomTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return TextFormField(
       onChanged: onChanged,
       controller: controller,
@@ -84,18 +90,25 @@ class CustomTextField extends StatelessWidget {
       maxLines: maxLines,
       minLines: minLines,
       textDirection: textDirection,
-      style: GoogleFonts.cairo(),
+      style: GoogleFonts.cairo(
+        color: Theme.of(context).textTheme.bodyLarge?.color,
+      ),
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
-        hintStyle: GoogleFonts.cairo(fontSize: 12, color: Colors.grey),
-        labelStyle: GoogleFonts.cairo(color: Colors.grey.shade600),
+        hintStyle: GoogleFonts.cairo(
+          fontSize: 12,
+          color: isDark ? Colors.grey.shade500 : Colors.grey,
+        ),
+        labelStyle: GoogleFonts.cairo(
+          color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+        ),
         prefixIcon: icon != null
             ? Icon(icon, color: const Color(0xFF008695), size: 20)
             : null,
         suffixIcon: suffix,
         filled: true,
-        fillColor: Colors.grey.shade50,
+        fillColor: isDark ? const Color(0xFF1E2329) : Colors.grey.shade50,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 20,
           vertical: 15,
@@ -106,7 +119,9 @@ class CustomTextField extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide(color: Colors.grey.shade200),
+          borderSide: BorderSide(
+            color: isDark ? const Color(0xFF2F3640) : Colors.grey.shade200,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
@@ -133,6 +148,7 @@ class SelectableChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -155,14 +171,20 @@ class SelectableChip extends StatelessWidget {
                 ],
               )
             : BoxDecoration(
-                color: Colors.grey.shade100,
+                color: isDark ? const Color(0xFF1E2329) : Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(15),
-                border: Border.all(color: Colors.grey.shade300),
+                border: Border.all(
+                  color: isDark
+                      ? const Color(0xFF2F3640)
+                      : Colors.grey.shade300,
+                ),
               ),
         child: Text(
           label,
           style: GoogleFonts.cairo(
-            color: isSelected ? Colors.white : Colors.black87,
+            color: isSelected
+                ? Colors.white
+                : (isDark ? Colors.grey.shade300 : Colors.black87),
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
           ),
         ),
@@ -185,6 +207,7 @@ class GradientSelectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -207,16 +230,23 @@ class GradientSelectionCard extends StatelessWidget {
                 ],
               )
             : BoxDecoration(
-                color: Colors.grey.shade50,
+                color: isDark ? const Color(0xFF1E2329) : Colors.grey.shade50,
                 borderRadius: BorderRadius.circular(15),
-                border: Border.all(color: Colors.grey.shade200, width: 2),
+                border: Border.all(
+                  color: isDark
+                      ? const Color(0xFF2F3640)
+                      : Colors.grey.shade200,
+                  width: 2,
+                ),
               ),
         child: Center(
           child: Text(
             title,
             style: GoogleFonts.cairo(
               fontWeight: FontWeight.bold,
-              color: isSelected ? Colors.white : Colors.grey,
+              color: isSelected
+                  ? Colors.white
+                  : (isDark ? Colors.grey.shade400 : Colors.grey),
             ),
           ),
         ),
@@ -239,24 +269,37 @@ class DynamicAddField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       children: [
         Expanded(
           child: TextField(
             controller: controller,
-            style: GoogleFonts.cairo(fontSize: 14),
+            style: GoogleFonts.cairo(
+              fontSize: 14,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+            ),
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: GoogleFonts.cairo(fontSize: 12, color: Colors.grey),
+              hintStyle: GoogleFonts.cairo(
+                fontSize: 12,
+                color: isDark ? Colors.grey.shade500 : Colors.grey,
+              ),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 15,
                 vertical: 10,
               ),
               filled: true,
-              fillColor: Colors.grey.shade50,
+              fillColor: isDark ? const Color(0xFF1E2329) : Colors.grey.shade50,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
                 borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide(
+                  color: isDark ? const Color(0xFF2F3640) : Colors.transparent,
+                ),
               ),
             ),
             onSubmitted: (val) {
@@ -304,6 +347,7 @@ class BilingualAddField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       children: [
         Row(
@@ -313,46 +357,72 @@ class BilingualAddField extends StatelessWidget {
                 children: [
                   TextField(
                     controller: arController,
-                    style: GoogleFonts.cairo(fontSize: 14),
+                    style: GoogleFonts.cairo(
+                      fontSize: 14,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
                     textDirection: TextDirection.rtl,
                     decoration: InputDecoration(
                       hintText: arHint,
                       hintStyle: GoogleFonts.cairo(
                         fontSize: 12,
-                        color: Colors.grey,
+                        color: isDark ? Colors.grey.shade500 : Colors.grey,
                       ),
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 15,
                         vertical: 10,
                       ),
                       filled: true,
-                      fillColor: Colors.grey.shade50,
+                      fillColor: isDark
+                          ? const Color(0xFF1E2329)
+                          : Colors.grey.shade50,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(15),
                         borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: BorderSide(
+                          color: isDark
+                              ? const Color(0xFF2F3640)
+                              : Colors.transparent,
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 8),
                   TextField(
                     controller: enController,
-                    style: GoogleFonts.cairo(fontSize: 14),
+                    style: GoogleFonts.cairo(
+                      fontSize: 14,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
                     textDirection: TextDirection.ltr,
                     decoration: InputDecoration(
                       hintText: enHint,
                       hintStyle: GoogleFonts.cairo(
                         fontSize: 12,
-                        color: Colors.grey,
+                        color: isDark ? Colors.grey.shade500 : Colors.grey,
                       ),
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 15,
                         vertical: 10,
                       ),
                       filled: true,
-                      fillColor: Colors.grey.shade50,
+                      fillColor: isDark
+                          ? const Color(0xFF1E2329)
+                          : Colors.grey.shade50,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(15),
                         borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: BorderSide(
+                          color: isDark
+                              ? const Color(0xFF2F3640)
+                              : Colors.transparent,
+                        ),
                       ),
                     ),
                   ),

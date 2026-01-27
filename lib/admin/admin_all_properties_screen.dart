@@ -23,19 +23,19 @@ class _AdminAllPropertiesScreenState extends State<AdminAllPropertiesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7F9),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           'إدارة كل الشقق',
           style: GoogleFonts.cairo(
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: Theme.of(context).textTheme.bodyLarge?.color,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
+        iconTheme: Theme.of(context).appBarTheme.iconTheme,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -61,15 +61,22 @@ class _AdminAllPropertiesScreenState extends State<AdminAllPropertiesScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 15),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).cardTheme.color,
                 borderRadius: BorderRadius.circular(15),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 5),
-                  ),
-                ],
+                boxShadow: Theme.of(context).brightness == Brightness.dark
+                    ? []
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                border: Border.all(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? const Color(0xFF2F3640)
+                      : Colors.transparent,
+                ),
               ),
               child: TextField(
                 controller: _searchController,
@@ -83,6 +90,9 @@ class _AdminAllPropertiesScreenState extends State<AdminAllPropertiesScreen> {
                   hintStyle: GoogleFonts.cairo(color: Colors.grey),
                   border: InputBorder.none,
                   icon: const Icon(Icons.search, color: Colors.grey),
+                ),
+                style: GoogleFonts.cairo(
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
             ),
@@ -240,15 +250,22 @@ class _AdminAllPropertiesScreenState extends State<AdminAllPropertiesScreen> {
       margin: const EdgeInsets.only(bottom: 15),
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 5,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: Theme.of(context).brightness == Brightness.dark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 5,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+        border: Border.all(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? const Color(0xFF2F3640)
+              : Colors.transparent,
+        ),
       ),
       child: Row(
         children: [
@@ -292,6 +309,7 @@ class _AdminAllPropertiesScreenState extends State<AdminAllPropertiesScreen> {
                         style: GoogleFonts.cairo(
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
                         ),
                       ),
                     ),
@@ -306,16 +324,24 @@ class _AdminAllPropertiesScreenState extends State<AdminAllPropertiesScreen> {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.blueGrey.shade50,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? const Color(0xFF1E2329)
+                            : Colors.blueGrey.shade50,
                         borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: Colors.blueGrey.shade200),
+                        border: Border.all(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? const Color(0xFF2F3640)
+                              : Colors.blueGrey.shade200,
+                        ),
                       ),
                       child: Text(
                         property.id,
                         style: GoogleFonts.cairo(
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
-                          color: Colors.blueGrey.shade800,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.grey.shade300
+                              : Colors.blueGrey.shade800,
                         ),
                       ),
                     ),

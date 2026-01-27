@@ -33,10 +33,24 @@ class _AdminUniversitiesScreenState extends State<AdminUniversitiesScreen> {
               controller: _nameController,
               decoration: InputDecoration(
                 labelText: 'اسم الجامعة (عربي)',
-                labelStyle: GoogleFonts.cairo(),
+                labelStyle: GoogleFonts.cairo(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.grey.shade400
+                      : Colors.grey.shade600,
+                ),
+                filled: true,
+                fillColor: Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFF1E2329)
+                    : Colors.grey.shade50,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
+                  borderSide: Theme.of(context).brightness == Brightness.dark
+                      ? const BorderSide(color: Color(0xFF2F3640))
+                      : BorderSide.none,
                 ),
+              ),
+              style: GoogleFonts.cairo(
+                color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
               textAlign: TextAlign.right,
             ),
@@ -45,10 +59,24 @@ class _AdminUniversitiesScreenState extends State<AdminUniversitiesScreen> {
               controller: _nameEnController,
               decoration: InputDecoration(
                 labelText: 'University Name (EN)',
-                labelStyle: GoogleFonts.cairo(),
+                labelStyle: GoogleFonts.cairo(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.grey.shade400
+                      : Colors.grey.shade600,
+                ),
+                filled: true,
+                fillColor: Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFF1E2329)
+                    : Colors.grey.shade50,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
+                  borderSide: Theme.of(context).brightness == Brightness.dark
+                      ? const BorderSide(color: Color(0xFF2F3640))
+                      : BorderSide.none,
                 ),
+              ),
+              style: GoogleFonts.cairo(
+                color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
               textAlign: TextAlign.left,
               textDirection: TextDirection.ltr,
@@ -129,19 +157,19 @@ class _AdminUniversitiesScreenState extends State<AdminUniversitiesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7F9),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           'إدارة الجامعات',
           style: GoogleFonts.cairo(
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: Theme.of(context).textTheme.bodyLarge?.color,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
+        iconTheme: Theme.of(context).appBarTheme.iconTheme,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showUniversityDialog(),
@@ -199,7 +227,10 @@ class _AdminUniversitiesScreenState extends State<AdminUniversitiesScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15),
                 ),
-                elevation: 2,
+                color: Theme.of(context).cardTheme.color,
+                elevation: Theme.of(context).brightness == Brightness.dark
+                    ? 0
+                    : 2,
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: ListTile(
@@ -216,6 +247,7 @@ class _AdminUniversitiesScreenState extends State<AdminUniversitiesScreen> {
                       style: GoogleFonts.cairo(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                     subtitle: Text(

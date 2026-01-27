@@ -65,12 +65,19 @@ class _AdminContactNumbersScreenState extends State<AdminContactNumbersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           'إدارة أرقام التواصل',
-          style: GoogleFonts.cairo(fontWeight: FontWeight.bold),
+          style: GoogleFonts.cairo(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).textTheme.bodyLarge?.color,
+          ),
         ),
         centerTitle: true,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        elevation: 0,
+        iconTheme: Theme.of(context).appBarTheme.iconTheme,
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -82,11 +89,33 @@ class _AdminContactNumbersScreenState extends State<AdminContactNumbersScreen> {
                   child: TextField(
                     controller: _numberController,
                     keyboardType: TextInputType.phone,
+                    style: GoogleFonts.cairo(
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
                     decoration: InputDecoration(
                       hintText: 'أدخل رقم الهاتف (مثلاً 010...)',
-                      hintStyle: GoogleFonts.cairo(),
+                      hintStyle: GoogleFonts.cairo(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.grey.shade500
+                            : Colors.grey,
+                      ),
+                      filled: true,
+                      fillColor: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFF1E2329)
+                          : Colors.grey.shade50,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(15),
+                        borderSide:
+                            Theme.of(context).brightness == Brightness.dark
+                            ? const BorderSide(color: Color(0xFF2F3640))
+                            : BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide:
+                            Theme.of(context).brightness == Brightness.dark
+                            ? const BorderSide(color: Color(0xFF2F3640))
+                            : BorderSide.none,
                       ),
                     ),
                   ),
@@ -146,12 +175,20 @@ class _AdminContactNumbersScreenState extends State<AdminContactNumbersScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
                         ),
+                        color: Theme.of(context).cardTheme.color,
+                        elevation:
+                            Theme.of(context).brightness == Brightness.dark
+                            ? 0
+                            : 2,
                         child: ListTile(
                           title: Text(
                             data['number'],
                             style: GoogleFonts.cairo(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyLarge?.color,
                             ),
                           ),
                           trailing: IconButton(

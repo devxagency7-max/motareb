@@ -198,19 +198,29 @@ class _AvailableUnitsCardState extends State<AvailableUnitsCard> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? const Color(0xFF1E2329)
+                              : Colors.grey.shade100,
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: Colors.grey.shade300),
+                          border: Border.all(
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? const Color(0xFF2F3640)
+                                : Colors.grey.shade300,
+                          ),
                         ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             value: mode,
                             isExpanded: true,
                             style: GoogleFonts.cairo(
-                              color: Colors.black,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyLarge?.color,
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
                             ),
+                            dropdownColor: Theme.of(context).cardTheme.color,
                             items: [
                               DropdownMenuItem(
                                 value: 'unit',
@@ -361,7 +371,9 @@ class _AvailableUnitsCardState extends State<AvailableUnitsCard> {
             border: Border.all(
               color: widget.isFullApartmentNotifier.value
                   ? const Color(0xFF008695)
-                  : Colors.grey.shade300,
+                  : (Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFF2F3640)
+                        : Colors.grey.shade300),
             ),
           ),
           child: SwitchListTile(
@@ -372,7 +384,7 @@ class _AvailableUnitsCardState extends State<AvailableUnitsCard> {
                 fontSize: 14,
                 color: widget.isFullApartmentNotifier.value
                     ? const Color(0xFF008695)
-                    : Colors.black,
+                    : Theme.of(context).textTheme.bodyLarge?.color,
               ),
             ),
             subtitle: Text(
@@ -413,10 +425,14 @@ class _AvailableUnitsCardState extends State<AvailableUnitsCard> {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 20),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFF1E2329)
+                          : Colors.grey.shade100,
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: Colors.grey.shade300,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? const Color(0xFF2F3640)
+                            : Colors.grey.shade300,
                         style: BorderStyle.solid,
                       ),
                     ),
@@ -430,7 +446,12 @@ class _AvailableUnitsCardState extends State<AvailableUnitsCard> {
                         const SizedBox(height: 10),
                         Text(
                           'لا توجد غرف مضافة بعد',
-                          style: GoogleFonts.cairo(color: Colors.grey.shade600),
+                          style: GoogleFonts.cairo(
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.grey.shade400
+                                : Colors.grey.shade600,
+                          ),
                         ),
                       ],
                     ),
@@ -460,15 +481,24 @@ class _AvailableUnitsCardState extends State<AvailableUnitsCard> {
                       return Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Theme.of(context).cardTheme.color,
                           borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 5,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
+                          boxShadow:
+                              Theme.of(context).brightness == Brightness.dark
+                              ? []
+                              : [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.05),
+                                    blurRadius: 5,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                          border: Border.all(
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? const Color(0xFF2F3640)
+                                : Colors.transparent,
+                          ),
                         ),
                         child: Row(
                           children: [
@@ -494,6 +524,9 @@ class _AvailableUnitsCardState extends State<AvailableUnitsCard> {
                                     style: GoogleFonts.cairo(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 14,
+                                      color: Theme.of(
+                                        context,
+                                      ).textTheme.bodyLarge?.color,
                                     ),
                                   ),
                                   Text(
@@ -591,9 +624,15 @@ class _AvailableUnitsCardState extends State<AvailableUnitsCard> {
             width: double.infinity,
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.grey.shade50,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? const Color(0xFF1E2329)
+                  : Colors.grey.shade50,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.grey.shade400),
+              border: Border.all(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFF2F3640)
+                    : Colors.grey.shade400,
+              ),
             ),
             child: Column(
               children: [
@@ -607,7 +646,9 @@ class _AvailableUnitsCardState extends State<AvailableUnitsCard> {
                   'تم تفعيل وضع "حجز الشقة بالكامل"',
                   style: GoogleFonts.cairo(
                     fontWeight: FontWeight.bold,
-                    color: Colors.grey.shade700,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey.shade400
+                        : Colors.grey.shade700,
                   ),
                 ),
                 Text(
@@ -743,8 +784,11 @@ class _RoomEditDialogState extends State<RoomEditDialog> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                fillColor: Colors.orange.withValues(alpha: 0.1),
+                fillColor: Colors.orange.withOpacity(0.1),
                 filled: true,
+              ),
+              style: GoogleFonts.cairo(
+                color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
             ),
           ],

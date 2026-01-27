@@ -127,8 +127,8 @@ class _ChatScreenState extends State<ChatScreen> {
         final hasPinnedMessages = messages.any((m) => m.isPinned);
 
         return Scaffold(
-          backgroundColor: const Color(0xFFE5E5E5).withOpacity(0.5),
-          appBar: _buildAppBar(hasPinnedMessages, messages),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          appBar: _buildAppBar(context, hasPinnedMessages, messages),
           body: Column(
             children: [
               Expanded(
@@ -199,7 +199,11 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  AppBar _buildAppBar(bool hasPinned, List<Message> messages) {
+  AppBar _buildAppBar(
+    BuildContext context,
+    bool hasPinned,
+    List<Message> messages,
+  ) {
     return AppBar(
       title: Row(
         children: [
@@ -220,7 +224,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   widget.userName,
                   style: GoogleFonts.cairo(
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
                     fontSize: 16,
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -234,10 +238,10 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         ],
       ),
-      backgroundColor: Colors.white,
-      elevation: 1,
+      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+      elevation: 0,
       centerTitle: false,
-      iconTheme: const IconThemeData(color: Colors.black),
+      iconTheme: Theme.of(context).appBarTheme.iconTheme,
       actions: [
         if (hasPinned)
           IconButton(
@@ -245,7 +249,13 @@ class _ChatScreenState extends State<ChatScreen> {
             onPressed: () => _scrollToNextPinnedMessage(messages),
             tooltip: 'الانتقال للرسائل المثبتة',
           ),
-        IconButton(icon: const Icon(Icons.more_vert), onPressed: () {}),
+        IconButton(
+          icon: Icon(
+            Icons.more_vert,
+            color: Theme.of(context).appBarTheme.iconTheme?.color,
+          ),
+          onPressed: () {},
+        ),
       ],
     );
   }
@@ -269,12 +279,19 @@ class _ChatScreenState extends State<ChatScreen> {
       margin: const EdgeInsets.symmetric(vertical: 15),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.2),
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Colors.white.withOpacity(0.1)
+            : Colors.grey.withOpacity(0.2),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         text,
-        style: GoogleFonts.cairo(fontSize: 12, color: Colors.black54),
+        style: GoogleFonts.cairo(
+          fontSize: 12,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.grey.shade400
+              : Colors.black54,
+        ),
       ),
     );
   }
@@ -285,12 +302,19 @@ class _ChatScreenState extends State<ChatScreen> {
         margin: const EdgeInsets.symmetric(vertical: 10),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: Colors.blueGrey.withOpacity(0.1),
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.blueGrey.withOpacity(0.2)
+              : Colors.blueGrey.withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
           msg.text,
-          style: GoogleFonts.cairo(fontSize: 11, color: Colors.blueGrey),
+          style: GoogleFonts.cairo(
+            fontSize: 11,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.blueGrey.shade300
+                : Colors.blueGrey,
+          ),
           textAlign: TextAlign.center,
         ),
       ),
@@ -319,20 +343,25 @@ class _ChatScreenState extends State<ChatScreen> {
                       end: Alignment.bottomRight,
                     )
                   : null,
-              color: !isMe ? Colors.white : null,
+              color: !isMe ? Theme.of(context).cardTheme.color : null,
+              border: !isMe && Theme.of(context).brightness == Brightness.dark
+                  ? Border.all(color: const Color(0xFF2F3640))
+                  : null,
               borderRadius: BorderRadius.only(
                 topLeft: const Radius.circular(16),
                 topRight: const Radius.circular(16),
                 bottomLeft: Radius.circular(isMe ? 16 : 0),
                 bottomRight: Radius.circular(!isMe ? 16 : 0),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 3,
-                  offset: const Offset(0, 1),
-                ),
-              ],
+              boxShadow: Theme.of(context).brightness == Brightness.dark
+                  ? []
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 3,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
             ),
             child: Padding(
               padding: const EdgeInsets.all(4.0),
@@ -361,7 +390,9 @@ class _ChatScreenState extends State<ChatScreen> {
                           }
                         },
                         style: GoogleFonts.cairo(
-                          color: isMe ? Colors.white : Colors.black87,
+                          color: isMe
+                              ? Colors.white
+                              : Theme.of(context).textTheme.bodyLarge?.color,
                           fontSize: 15,
                         ),
                         linkStyle: GoogleFonts.cairo(
@@ -395,7 +426,12 @@ class _ChatScreenState extends State<ChatScreen> {
                           DateFormat('hh:mm a').format(msg.timestamp),
                           style: TextStyle(
                             fontSize: 10,
-                            color: isMe ? Colors.white70 : Colors.grey[600],
+                            color: isMe
+                                ? Colors.white70
+                                : (Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.grey.shade400
+                                      : Colors.grey[600]),
                           ),
                         ),
                         if (isMe) ...[
@@ -442,8 +478,11 @@ class _ChatScreenState extends State<ChatScreen> {
       onTap: () {
         showDialog(
           context: context,
-          builder: (_) =>
-              Dialog(child: InteractiveViewer(child: Image.network(msg.text))),
+          builder: (_) => Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: EdgeInsets.zero,
+            child: InteractiveViewer(child: Image.network(msg.text)),
+          ),
         );
       },
       child: ClipRRect(
@@ -478,8 +517,13 @@ class _ChatScreenState extends State<ChatScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 5)],
+        color: Theme.of(context).cardTheme.color,
+        boxShadow: Theme.of(context).brightness == Brightness.dark
+            ? []
+            : [BoxShadow(color: Colors.black12, blurRadius: 5)],
+        border: Theme.of(context).brightness == Brightness.dark
+            ? const Border(top: BorderSide(color: Color(0xFF2F3640)))
+            : null,
       ),
       child: SafeArea(
         child: Row(
@@ -495,17 +539,30 @@ class _ChatScreenState extends State<ChatScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 15),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? const Color(0xFF121212).withOpacity(0.5)
+                      : Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(25),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFF2F3640)
+                        : Colors.grey.shade300,
+                  ),
                 ),
                 child: TextField(
                   controller: _chatController,
                   maxLines: 5,
                   minLines: 1,
+                  style: GoogleFonts.cairo(
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                  ),
                   decoration: InputDecoration(
                     hintText: 'اكتب رسالة...',
-                    hintStyle: GoogleFonts.cairo(color: Colors.grey),
+                    hintStyle: GoogleFonts.cairo(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey.shade600
+                          : Colors.grey,
+                    ),
                     border: InputBorder.none,
                   ),
                 ),
@@ -559,6 +616,10 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
       builder: (context) {
         return Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
           padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -571,7 +632,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
                 title: Text(
                   msg.isPinned ? 'إلغاء التثبيت' : 'تثبيت الرسالة',
-                  style: GoogleFonts.cairo(),
+                  style: GoogleFonts.cairo(
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                  ),
                 ),
                 onTap: () {
                   Navigator.pop(context);
@@ -585,7 +648,12 @@ class _ChatScreenState extends State<ChatScreen> {
                 // Edit
                 ListTile(
                   leading: const Icon(Icons.edit, color: Colors.blue),
-                  title: Text('تعديل', style: GoogleFonts.cairo()),
+                  title: Text(
+                    'تعديل',
+                    style: GoogleFonts.cairo(
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
+                  ),
                   onTap: () {
                     Navigator.pop(context);
                     _showEditDialog(context, msg);
@@ -594,7 +662,12 @@ class _ChatScreenState extends State<ChatScreen> {
                 // Copy
                 ListTile(
                   leading: const Icon(Icons.copy, color: Colors.grey),
-                  title: Text('نسخ', style: GoogleFonts.cairo()),
+                  title: Text(
+                    'نسخ',
+                    style: GoogleFonts.cairo(
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
+                  ),
                   onTap: () {
                     // Clipboard logic
                     Navigator.pop(context);
@@ -604,7 +677,12 @@ class _ChatScreenState extends State<ChatScreen> {
               // Delete
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
-                title: Text('حذف', style: GoogleFonts.cairo()),
+                title: Text(
+                  'حذف',
+                  style: GoogleFonts.cairo(
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                  ),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   context.read<ChatProvider>().deleteMessage(msg.id);
@@ -626,14 +704,26 @@ class _ChatScreenState extends State<ChatScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
+          backgroundColor: Theme.of(context).cardTheme.color,
           title: Text(
             'تعديل الرسالة',
-            style: GoogleFonts.cairo(fontWeight: FontWeight.bold),
+            style: GoogleFonts.cairo(
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+            ),
           ),
           content: TextField(
             controller: editController,
             maxLines: 3,
-            decoration: const InputDecoration(border: OutlineInputBorder()),
+            style: GoogleFonts.cairo(
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+            ),
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Theme.of(context).dividerColor),
+              ),
+            ),
           ),
           actions: [
             TextButton(

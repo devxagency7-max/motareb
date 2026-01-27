@@ -649,6 +649,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Video deleted successfully 🗑️'**
   String get videoDeleteSuccess;
+
+  /// No description provided for @ads.
+  ///
+  /// In en, this message translates to:
+  /// **'Ads'**
+  String get ads;
+
+  /// No description provided for @manageAds.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Ads and Spaces'**
+  String get manageAds;
 }
 
 class _AppLocalizationsDelegate

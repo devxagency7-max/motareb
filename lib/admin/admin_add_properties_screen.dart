@@ -405,7 +405,7 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           widget.propertyToEdit != null
@@ -413,15 +413,18 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
               : context.loc.addProperty,
           style: GoogleFonts.cairo(
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: Theme.of(context).textTheme.bodyLarge?.color,
             fontSize: 22,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.transparent,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: Icon(
+            Icons.arrow_back_ios,
+            color: Theme.of(context).appBarTheme.iconTheme?.color,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -435,15 +438,22 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
               // --- Admin Number Input ---
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardTheme.color,
                   borderRadius: BorderRadius.circular(15),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
+                  boxShadow: Theme.of(context).brightness == Brightness.dark
+                      ? []
+                      : [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
+                  border: Border.all(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFF2F3640)
+                        : Colors.transparent,
+                  ),
                 ),
                 padding: const EdgeInsets.all(15),
                 margin: const EdgeInsets.only(bottom: 20),
@@ -468,7 +478,9 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
                             style: TextStyle(
                               color: widget.propertyToEdit != null
                                   ? Colors.grey
-                                  : Colors.black,
+                                  : Theme.of(
+                                      context,
+                                    ).textTheme.bodyLarge?.color,
                             ),
                             decoration: InputDecoration(
                               hintText: 'مثال: 123',
@@ -479,7 +491,9 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
                                 horizontal: 10,
                               ),
                               fillColor: widget.propertyToEdit != null
-                                  ? Colors.grey.shade100
+                                  ? Theme.of(
+                                      context,
+                                    ).dividerColor.withOpacity(0.1)
                                   : null,
                               filled: widget.propertyToEdit != null,
                             ),

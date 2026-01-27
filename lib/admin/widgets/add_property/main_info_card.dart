@@ -124,26 +124,42 @@ class MainInfoCard extends StatelessWidget {
               value: currentGov,
               decoration: InputDecoration(
                 labelText: 'المحافظة (الزامي) *',
-                labelStyle: GoogleFonts.cairo(color: Colors.grey.shade600),
+                labelStyle: GoogleFonts.cairo(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.grey.shade400
+                      : Colors.grey.shade600,
+                ),
                 filled: true,
-                fillColor: Colors.grey.shade50,
+                fillColor: Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFF1E2329)
+                    : Colors.grey.shade50,
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 20,
                   vertical: 15,
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(15),
-                  borderSide: BorderSide(color: Colors.grey.shade200),
+                  borderSide: BorderSide.none,
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(15),
-                  borderSide: BorderSide(color: Colors.grey.shade200),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFF2F3640)
+                        : Colors.grey.shade200,
+                  ),
                 ),
               ),
+              dropdownColor: Theme.of(context).cardTheme.color,
               items: _governorates.map((String val) {
                 return DropdownMenuItem<String>(
                   value: val,
-                  child: Text(val, style: GoogleFonts.cairo()),
+                  child: Text(
+                    val,
+                    style: GoogleFonts.cairo(
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
+                  ),
                 );
               }).toList(),
               onChanged: (val) {

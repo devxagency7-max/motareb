@@ -34,7 +34,9 @@ class AdminVerificationScreen extends StatelessWidget {
         ),
       ),
       body: Container(
-        decoration: const BoxDecoration(color: Color(0xFFF5F7F9)),
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+        ),
         child: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('users')
@@ -87,15 +89,22 @@ class AdminVerificationScreen extends StatelessWidget {
                   child: Container(
                     margin: const EdgeInsets.only(bottom: 15),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).cardTheme.color,
                       borderRadius: BorderRadius.circular(15),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 5),
-                        ),
-                      ],
+                      boxShadow: Theme.of(context).brightness == Brightness.dark
+                          ? []
+                          : [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 10,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                      border: Border.all(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? const Color(0xFF2F3640)
+                            : Colors.transparent,
+                      ),
                     ),
                     child: ListTile(
                       contentPadding: const EdgeInsets.all(15),
@@ -115,7 +124,10 @@ class AdminVerificationScreen extends StatelessWidget {
                       ),
                       title: Text(
                         user['fullName'] ?? user['name'] ?? 'مستخدم بدون اسم',
-                        style: GoogleFonts.cairo(fontWeight: FontWeight.bold),
+                        style: GoogleFonts.cairo(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
+                        ),
                       ),
                       subtitle: Text(
                         user['email'] ?? 'لا يوجد بريد',
@@ -156,9 +168,14 @@ class AdminVerificationScreen extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         height: MediaQuery.of(context).size.height * 0.85,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+          border: Border.all(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? const Color(0xFF2F3640)
+                : Colors.transparent,
+          ),
         ),
         padding: const EdgeInsets.all(25),
         child: Column(
@@ -177,6 +194,7 @@ class AdminVerificationScreen extends StatelessWidget {
               style: GoogleFonts.cairo(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
             ),
             const Divider(),
@@ -188,19 +206,25 @@ class AdminVerificationScreen extends StatelessWidget {
                     _buildInfoTile(
                       'الاسم الكامل',
                       user['fullName'] ?? user['name'] ?? 'غير متوفر',
+                      context,
                     ),
                     _buildInfoTile(
                       'مكان الإقامة',
                       user['residence'] ?? 'غير متوفر',
+                      context,
                     ),
                     _buildInfoTile(
                       'تاريخ الميلاد',
                       user['birthDate'] ?? 'غير متوفر',
+                      context,
                     ),
                     const SizedBox(height: 20),
                     Text(
                       'صور الهوية:',
-                      style: GoogleFonts.cairo(fontWeight: FontWeight.bold),
+                      style: GoogleFonts.cairo(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     Row(
@@ -209,6 +233,7 @@ class AdminVerificationScreen extends StatelessWidget {
                           child: _buildImageCard(
                             'الوجه الأمامي',
                             user['idFrontUrl'],
+                            context,
                           ),
                         ),
                         const SizedBox(width: 10),
@@ -216,6 +241,7 @@ class AdminVerificationScreen extends StatelessWidget {
                           child: _buildImageCard(
                             'الوجه الخلفي',
                             user['idBackUrl'],
+                            context,
                           ),
                         ),
                       ],
@@ -271,7 +297,7 @@ class AdminVerificationScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoTile(String label, String value) {
+  Widget _buildInfoTile(String label, String value, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Column(
@@ -283,14 +309,18 @@ class AdminVerificationScreen extends StatelessWidget {
           ),
           Text(
             value,
-            style: GoogleFonts.cairo(fontSize: 16, fontWeight: FontWeight.w600),
+            style: GoogleFonts.cairo(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildImageCard(String label, String? url) {
+  Widget _buildImageCard(String label, String? url, BuildContext context) {
     return Column(
       children: [
         Text(label, style: GoogleFonts.cairo(fontSize: 12)),
@@ -299,9 +329,15 @@ class AdminVerificationScreen extends StatelessWidget {
           height: 150,
           width: double.infinity,
           decoration: BoxDecoration(
-            color: Colors.grey.shade100,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? const Color(0xFF1E2329)
+                : Colors.grey.shade100,
             borderRadius: BorderRadius.circular(15),
-            border: Border.all(color: Colors.grey.shade300),
+            border: Border.all(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? const Color(0xFF2F3640)
+                  : Colors.grey.shade300,
+            ),
           ),
           child: url != null
               ? ClipRRect(

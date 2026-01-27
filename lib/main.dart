@@ -2,22 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:admin_motareb/l10n/app_localizations.dart';
 import 'package:admin_motareb/core/providers/locale_provider.dart';
+import 'package:admin_motareb/core/providers/theme_provider.dart';
+import 'package:admin_motareb/core/theme/admin_theme.dart';
 
 // Imports for Admin App
 import 'firebase_options.dart';
 
 import 'package:admin_motareb/admin/admin_dashboard.dart';
-import 'package:admin_motareb/features/auth/screens/admin_login_screen.dart'; // Added
+import 'package:admin_motareb/features/auth/screens/admin_login_screen.dart';
 import 'package:admin_motareb/features/auth/providers/auth_provider.dart';
 import 'package:admin_motareb/features/chat/providers/chat_provider.dart';
 import 'package:admin_motareb/features/home/providers/home_provider.dart';
-
-// Make sure to handle other providers if needed
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +29,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => HomeProvider()),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
-        // ChatProvider usually depends on AuthProvider
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProxyProvider<AuthProvider, ChatProvider>(
           create: (context) => ChatProvider(context.read<AuthProvider>()),
           update: (context, auth, previous) =>
@@ -48,6 +47,7 @@ class AdminApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localeProvider = Provider.of<LocaleProvider>(context);
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
     return MaterialApp(
       title: 'Motareb Admin',
@@ -60,11 +60,9 @@ class AdminApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: AppLocalizations.supportedLocales,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-        useMaterial3: true,
-        textTheme: GoogleFonts.cairoTextTheme(Theme.of(context).textTheme),
-      ),
+      theme: AdminTheme.lightTheme,
+      darkTheme: AdminTheme.darkTheme,
+      themeMode: themeProvider.themeMode,
       home: const AuthWrapper(),
     );
   }
@@ -85,16 +83,9 @@ class AuthWrapper extends StatelessWidget {
         }
 
         if (snapshot.hasData) {
-          // User is logged in
-
-          // Optionally: Check if user is admin explicitly here by fetching user doc
-          // For now, we assume anyone who can login via this app is an admin
-          // or we rely on AuthProvider to kick them out if not.
-
           return const AdminDashboard();
         }
 
-        // User is not logged in
         return const AdminLoginScreen();
       },
     );

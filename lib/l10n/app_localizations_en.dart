@@ -289,4 +289,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get videoDeleteSuccess => 'Video deleted successfully 🗑️';
+
+  @override
+  String get ads => 'Ads';
+
+  @override
+  String get manageAds => 'Manage Ads and Spaces';
 }
