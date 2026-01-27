@@ -9,10 +9,13 @@ import 'package:admin_motareb/utils/custom_snackbar.dart';
 class AdminAddPropertyController extends ChangeNotifier {
   // Text Controllers
   final titleController = TextEditingController();
+  final titleEnController = TextEditingController(); // NEW
   final priceController = TextEditingController();
   final discountPriceController = TextEditingController();
   final locationController = TextEditingController();
+  final locationEnController = TextEditingController(); // NEW
   final descriptionController = TextEditingController();
+  final descriptionEnController = TextEditingController(); // NEW
   final bedsController = TextEditingController();
   final roomsController = TextEditingController();
   final singleRoomsController = TextEditingController(); // NEW
@@ -20,6 +23,7 @@ class AdminAddPropertyController extends ChangeNotifier {
   final singleBedsController = TextEditingController(); // NEW
   final doubleBedsController = TextEditingController(); // NEW
   final featuredLabelController = TextEditingController();
+  final featuredLabelEnController = TextEditingController(); // NEW
   final customRuleController = TextEditingController();
   final customAmenityController = TextEditingController();
   final customUniversityController = TextEditingController();
@@ -198,6 +202,9 @@ class AdminAddPropertyController extends ChangeNotifier {
       final propertyData = {
         'ownerId': uid,
         'title': titleController.text.trim(),
+        'titleEn': titleEnController.text.trim().isEmpty
+            ? titleController.text.trim()
+            : titleEnController.text.trim(),
         'price': double.tryParse(priceController.text.trim()) ?? 0.0,
         'discountPrice': discountPriceController.text.trim().isNotEmpty
             ? double.tryParse(discountPriceController.text.trim())
@@ -205,9 +212,18 @@ class AdminAddPropertyController extends ChangeNotifier {
         'location': locationController.text.trim().isEmpty
             ? 'غير محدد'
             : locationController.text.trim(),
+        'locationEn': locationEnController.text.trim().isEmpty
+            ? locationController.text.trim()
+            : locationEnController.text.trim(),
         'governorate': selectedGovernorate,
         'description': descriptionController.text.trim(),
+        'descriptionEn': descriptionEnController.text.trim().isEmpty
+            ? descriptionController.text.trim()
+            : descriptionEnController.text.trim(),
         'featuredLabel': featuredLabelController.text.trim(),
+        'featuredLabelEn': featuredLabelEnController.text.trim().isEmpty
+            ? featuredLabelController.text.trim()
+            : featuredLabelEnController.text.trim(),
         'images': base64Images,
         'amenities': amenities,
         'rules': rules,
@@ -308,10 +324,13 @@ class AdminAddPropertyController extends ChangeNotifier {
   @override
   void dispose() {
     titleController.dispose();
+    titleEnController.dispose();
     priceController.dispose();
     discountPriceController.dispose();
     locationController.dispose();
+    locationEnController.dispose();
     descriptionController.dispose();
+    descriptionEnController.dispose();
     bedsController.dispose();
     roomsController.dispose();
     singleRoomsController.dispose();
@@ -319,6 +338,7 @@ class AdminAddPropertyController extends ChangeNotifier {
     singleBedsController.dispose();
     doubleBedsController.dispose();
     featuredLabelController.dispose();
+    featuredLabelEnController.dispose();
     customRuleController.dispose();
     customAmenityController.dispose();
     customUniversityController.dispose();

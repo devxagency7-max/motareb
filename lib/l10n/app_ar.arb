@@ -1,0 +1,15 @@
+{
+  "appTitle": "لوحة تحكم مطارب",
+  "dashboard": "لوحة التحكم",
+  "addProperty": "إضافة عقار",
+  "properties": "العقارات",
+  "users": "المستخدمين",
+  "reservations": "الحجوزات",
+  "settings": "الإعدادات",
+  "logout": "تسجيل الخروج",
+  "language": "اللغة",
+  "arabic": "العربية",
+  "english": "الإنجليزية",
+  "save": "حفظ",
+  "cancel": "إلغاء"
+}

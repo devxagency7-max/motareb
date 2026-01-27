@@ -3,7 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Property {
   final String id;
   final String title;
+  final String titleEn;
   final String location;
+  final String locationEn;
   final double price; // Changed to double
   final String imageUrl;
   final String type;
@@ -14,11 +16,21 @@ class Property {
   final String status; // Added
   final DateTime createdAt; // Added
 
-  final double? discountPrice; // Added
-  final List<String> rules; // Added
-  final String? featuredLabel; // Added "الكلمة المميزة"
+  final double? discountPrice;
+  final List<String> rules;
+  final String? featuredLabel;
+  final String? featuredLabelEn;
+
+  // Booking Modes
+  final String bookingMode; // 'unit' or 'bed'
+  final bool isFullApartmentBooking;
+  final int totalBeds; // For bed mode
+  final int apartmentRoomsCount; // For bed mode
+  final double bedPrice; // For bed mode
+  final String? generalRoomType; // For bed mode (e.g. shared, double)
 
   final String? description;
+  final String? descriptionEn;
   final String? governorate;
   final String? gender;
   final List<String> paymentMethods;
@@ -45,7 +57,9 @@ class Property {
   Property({
     required this.id,
     required this.title,
+    required this.titleEn,
     required this.location,
+    required this.locationEn,
     required this.price,
     this.discountPrice,
     required this.imageUrl,
@@ -58,7 +72,9 @@ class Property {
     this.status = 'pending',
     required this.createdAt,
     this.featuredLabel,
+    this.featuredLabelEn,
     this.description,
+    this.descriptionEn,
     this.governorate,
     this.gender,
     this.paymentMethods = const [],
@@ -75,6 +91,12 @@ class Property {
     this.ratingCount = 0,
     this.unitTypes = const [],
     this.rooms = const [],
+    this.bookingMode = 'unit',
+    this.isFullApartmentBooking = false,
+    this.totalBeds = 0,
+    this.apartmentRoomsCount = 0,
+    this.bedPrice = 0.0,
+    this.generalRoomType,
   });
 
   factory Property.fromSnapshot(QueryDocumentSnapshot doc) {
@@ -85,7 +107,9 @@ class Property {
     return Property(
       id: documentId,
       title: map['title'] ?? '',
+      titleEn: map['titleEn'] ?? map['title'] ?? '',
       location: map['location'] ?? '',
+      locationEn: map['locationEn'] ?? map['location'] ?? '',
       price: (map['price'] as num?)?.toDouble() ?? 0.0,
       discountPrice: (map['discountPrice'] as num?)?.toDouble(),
       imageUrl: (map['images'] as List<dynamic>?)?.isNotEmpty == true
@@ -117,7 +141,9 @@ class Property {
           ? (map['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
       featuredLabel: map['featuredLabel'],
+      featuredLabelEn: map['featuredLabelEn'] ?? map['featuredLabel'],
       description: map['description'],
+      descriptionEn: map['descriptionEn'] ?? map['description'],
       governorate: map['governorate'],
       gender: map['gender'],
       paymentMethods:
@@ -153,13 +179,21 @@ class Property {
               ?.map((e) => e as Map<String, dynamic>)
               .toList() ??
           [],
+      bookingMode: map['bookingMode'] ?? 'unit',
+      isFullApartmentBooking: map['isFullApartmentBooking'] ?? false,
+      totalBeds: (map['totalBeds'] as num?)?.toInt() ?? 0,
+      apartmentRoomsCount: (map['apartmentRoomsCount'] as num?)?.toInt() ?? 0,
+      bedPrice: (map['bedPrice'] as num?)?.toDouble() ?? 0.0,
+      generalRoomType: map['generalRoomType'],
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
       'title': title,
+      'titleEn': titleEn,
       'location': location,
+      'locationEn': locationEn,
       'price': price,
       'discountPrice': discountPrice,
       'images': images,
@@ -174,7 +208,9 @@ class Property {
       'status': status,
       'createdAt': Timestamp.fromDate(createdAt),
       'featuredLabel': featuredLabel,
+      'featuredLabelEn': featuredLabelEn,
       'description': description,
+      'descriptionEn': descriptionEn,
       'governorate': governorate,
       'gender': gender,
       'paymentMethods': paymentMethods,
@@ -188,6 +224,12 @@ class Property {
       'bathroomsCount': bathroomsCount,
       'unitTypes': unitTypes,
       'rooms': rooms,
+      'bookingMode': bookingMode,
+      'isFullApartmentBooking': isFullApartmentBooking,
+      'totalBeds': totalBeds,
+      'apartmentRoomsCount': apartmentRoomsCount,
+      'bedPrice': bedPrice,
+      'generalRoomType': generalRoomType,
     };
   }
 }

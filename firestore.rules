@@ -41,6 +41,11 @@ service cloud.firestore {
         allow read, write: if isAuth(); 
       }
     }
+
+    // ================= CONTACT NUMBERS =================
+    match /contact_numbers/{numberId} {
+      allow read, write: if true;
+    }
     
     // Default: Deny
     match /{document=**} {

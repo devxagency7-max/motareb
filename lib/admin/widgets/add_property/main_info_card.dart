@@ -1,0 +1,176 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'add_property_helpers.dart';
+import 'universities_selector_section.dart';
+
+class MainInfoCard extends StatelessWidget {
+  final TextEditingController titleController;
+  final TextEditingController titleEnController;
+  final TextEditingController priceController;
+  final TextEditingController discountPriceController;
+  final TextEditingController locationController;
+  final TextEditingController locationEnController;
+  final TextEditingController featuredLabelController;
+  final TextEditingController featuredLabelEnController;
+  final ValueNotifier<String> governorateNotifier;
+  final ValueNotifier<List<String>> universitiesNotifier;
+  final TextEditingController customUniversityController;
+
+  const MainInfoCard({
+    super.key,
+    required this.titleController,
+    required this.titleEnController,
+    required this.priceController,
+    required this.discountPriceController,
+    required this.locationController,
+    required this.locationEnController,
+    required this.featuredLabelController,
+    required this.featuredLabelEnController,
+    required this.governorateNotifier,
+    required this.universitiesNotifier,
+    required this.customUniversityController,
+  });
+
+  static const List<String> _governorates = [
+    'القاهرة',
+    'الجيزة',
+    'الإسكندرية',
+    'الدقهلية',
+    'البحر الأحمر',
+    'البحيرة',
+    'الفيوم',
+    'الغربية',
+    'الإسماعيلية',
+    'المنوفية',
+    'المنيا',
+    'القليوبية',
+    'الوادي الجديد',
+    'السويس',
+    'أسوان',
+    'أسيوط',
+    'بني سويف',
+    'بورسعيد',
+    'دمياط',
+    'الشرقية',
+    'جنوب سيناء',
+    'كفر الشيخ',
+    'مطروح',
+    'الأقصر',
+    'قنا',
+    'شمال سيناء',
+    'سوهاج',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return GlassCard(
+      children: [
+        const SectionLabel('بيانات العقار الأساسية 🏠'),
+        const SizedBox(height: 15),
+        CustomTextField(
+          label: 'عنوان الإعلان المميز (بالعربي) *',
+          hint: 'مثال: ستوديو فاخر بجوار الجامعة',
+          controller: titleController,
+          icon: Icons.title,
+        ),
+        const SizedBox(height: 10),
+        CustomTextField(
+          label: 'Property Title (English)',
+          hint: 'e.g. Luxury Studio near University',
+          controller: titleEnController,
+          icon: Icons.title,
+          textDirection: TextDirection.ltr,
+        ),
+        const SizedBox(height: 15),
+        CustomTextField(
+          label: 'السعر (ج.م) (الزامي) *',
+          hint: '0.0',
+          controller: priceController,
+          keyboardType: TextInputType.number,
+          icon: Icons.monetization_on_outlined,
+        ),
+        const SizedBox(height: 15),
+        CustomTextField(
+          label: 'سعر الخصم (اختياري)',
+          hint: '0.0 (اتركه فارغاً إذا لا يوجد خصم)',
+          controller: discountPriceController,
+          keyboardType: TextInputType.number,
+          icon: Icons.local_offer_outlined,
+        ),
+        const SizedBox(height: 15),
+        ValueListenableBuilder<String>(
+          valueListenable: governorateNotifier,
+          builder: (context, currentGov, child) {
+            return DropdownButtonFormField<String>(
+              value: currentGov,
+              decoration: InputDecoration(
+                labelText: 'المحافظة (الزامي) *',
+                labelStyle: GoogleFonts.cairo(color: Colors.grey.shade600),
+                filled: true,
+                fillColor: Colors.grey.shade50,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 15,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: BorderSide(color: Colors.grey.shade200),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: BorderSide(color: Colors.grey.shade200),
+                ),
+              ),
+              items: _governorates.map((String val) {
+                return DropdownMenuItem<String>(
+                  value: val,
+                  child: Text(val, style: GoogleFonts.cairo()),
+                );
+              }).toList(),
+              onChanged: (val) {
+                if (val != null) governorateNotifier.value = val;
+              },
+            );
+          },
+        ),
+        const SizedBox(height: 15),
+        CustomTextField(
+          label: 'الموقع التفصيلي (بالعربي)',
+          hint: 'الشارع، الحي، علامة مميزة...',
+          controller: locationController,
+          icon: Icons.location_on_outlined,
+          maxLines: 2,
+        ),
+        const SizedBox(height: 10),
+        CustomTextField(
+          label: 'Detailed Location (English)',
+          hint: 'Street, District, Landmark...',
+          controller: locationEnController,
+          icon: Icons.location_on_outlined,
+          maxLines: 2,
+          textDirection: TextDirection.ltr,
+        ),
+        const SizedBox(height: 15),
+        UniversitiesSelectorSection(
+          selectedUniversitiesNotifier: universitiesNotifier,
+          customUniversityController: customUniversityController,
+        ),
+        const SizedBox(height: 15),
+        CustomTextField(
+          label: 'كلمة مميزة - بادج (بالعربي)',
+          hint: 'مثال: خصم خاص، فرصة، قريب جداً',
+          controller: featuredLabelController,
+          icon: Icons.stars_rounded,
+        ),
+        const SizedBox(height: 10),
+        CustomTextField(
+          label: 'Featured Label (English)',
+          hint: 'e.g. Special Offer, Close to Uni',
+          controller: featuredLabelEnController,
+          icon: Icons.stars_rounded,
+          textDirection: TextDirection.ltr,
+        ),
+      ],
+    );
+  }
+}

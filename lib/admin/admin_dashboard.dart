@@ -10,6 +10,10 @@ import 'admin_users_screen.dart';
 import 'admin_reservations_screen.dart';
 import 'admin_universities_screen.dart';
 import 'admin_verification_screen.dart';
+import 'admin_contact_numbers_screen.dart';
+import 'package:admin_motareb/core/utils/loc_extension.dart';
+import 'package:admin_motareb/core/providers/locale_provider.dart';
+import 'package:provider/provider.dart';
 
 class AdminDashboard extends StatelessWidget {
   const AdminDashboard({super.key});
@@ -20,7 +24,7 @@ class AdminDashboard extends StatelessWidget {
       backgroundColor: const Color(0xFFF5F7F9),
       appBar: AppBar(
         title: Text(
-          'لوحة تحكم المشرف',
+          context.loc.appTitle,
           style: GoogleFonts.cairo(
             fontWeight: FontWeight.bold,
             color: Colors.black,
@@ -30,6 +34,27 @@ class AdminDashboard extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
+        actions: [
+          Consumer<LocaleProvider>(
+            builder: (context, localeProvider, child) {
+              final isArabic = localeProvider.locale?.languageCode != 'en';
+              return IconButton(
+                icon: Text(
+                  isArabic ? 'EN' : 'AR',
+                  style: GoogleFonts.cairo(
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF008695),
+                  ),
+                ),
+                onPressed: () {
+                  localeProvider.setLocale(
+                    isArabic ? const Locale('en') : const Locale('ar'),
+                  );
+                },
+              );
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -89,7 +114,7 @@ class AdminDashboard extends StatelessWidget {
                 children: [
                   _buildDashboardCard(
                     context,
-                    title: 'الحجوزات',
+                    title: context.loc.reservations,
                     subtitle: 'إدارة جميع الحجوزات',
                     icon: Icons.calendar_today_outlined,
                     color: Colors.indigo,
@@ -120,7 +145,7 @@ class AdminDashboard extends StatelessWidget {
                   // 1. ADD PROPERTY (NEW)
                   _buildDashboardCard(
                     context,
-                    title: 'إضافة شقة',
+                    title: context.loc.addProperty,
                     subtitle: 'نشر عقار جديد',
                     icon: Icons.add_home_work,
                     color: const Color(0xFF39BB5E),
@@ -169,7 +194,7 @@ class AdminDashboard extends StatelessWidget {
 
                   _buildDashboardCard(
                     context,
-                    title: 'المستخدمين',
+                    title: context.loc.users,
                     subtitle: 'إدارة الحسابات',
                     icon: Icons.people_outline,
                     color: Colors.purple,
@@ -199,7 +224,7 @@ class AdminDashboard extends StatelessWidget {
                   ),
                   _buildDashboardCard(
                     context,
-                    title: 'الإعدادات',
+                    title: context.loc.settings,
                     subtitle: 'إعدادات عامة',
                     icon: Icons.settings_outlined,
                     color: Colors.grey,
@@ -216,6 +241,22 @@ class AdminDashboard extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) => const AdminVerificationScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _buildDashboardCard(
+                    context,
+                    title: 'الأرقام',
+                    subtitle: 'إدارة أرقام التواصل',
+                    icon: Icons.phone_android,
+                    color: Colors.blueAccent,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              const AdminContactNumbersScreen(),
                         ),
                       );
                     },

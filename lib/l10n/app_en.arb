@@ -1,0 +1,15 @@
+{
+  "appTitle": "Motareb Admin",
+  "dashboard": "Dashboard",
+  "addProperty": "Add Property",
+  "properties": "Properties",
+  "users": "Users",
+  "reservations": "Reservations",
+  "settings": "Settings",
+  "logout": "Logout",
+  "language": "Language",
+  "arabic": "Arabic",
+  "english": "English",
+  "save": "Save",
+  "cancel": "Cancel"
+}

@@ -4,6 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:admin_motareb/l10n/app_localizations.dart';
+import 'package:admin_motareb/core/providers/locale_provider.dart';
 
 // Imports for Admin App
 import 'firebase_options.dart';
@@ -26,6 +29,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => HomeProvider()),
+        ChangeNotifierProvider(create: (_) => LocaleProvider()),
         // ChatProvider usually depends on AuthProvider
         ChangeNotifierProxyProvider<AuthProvider, ChatProvider>(
           create: (context) => ChatProvider(context.read<AuthProvider>()),
@@ -43,9 +47,19 @@ class AdminApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocaleProvider>(context);
+
     return MaterialApp(
       title: 'Motareb Admin',
       debugShowCheckedModeBanner: false,
+      locale: localeProvider.locale,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         useMaterial3: true,
