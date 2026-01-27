@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'add_property_helpers.dart';
 import 'universities_selector_section.dart';
+import '../../services/translation_service.dart';
 
 class MainInfoCard extends StatelessWidget {
   final TextEditingController titleController;
@@ -86,6 +87,18 @@ class MainInfoCard extends StatelessWidget {
           textDirection: TextDirection.ltr,
           maxLines: null,
           minLines: 1,
+          suffix: IconButton(
+            icon: const Icon(Icons.translate, color: Color(0xFF39BB5E)),
+            onPressed: () async {
+              final text = titleController.text.trim();
+              if (text.isNotEmpty) {
+                final translation = await TranslationService().translate(text);
+                if (translation != null) {
+                  titleEnController.text = translation;
+                }
+              }
+            },
+          ),
         ),
         const SizedBox(height: 15),
         CustomTextField(
@@ -157,6 +170,18 @@ class MainInfoCard extends StatelessWidget {
           maxLines: null,
           minLines: 2,
           textDirection: TextDirection.ltr,
+          suffix: IconButton(
+            icon: const Icon(Icons.translate, color: Color(0xFF39BB5E)),
+            onPressed: () async {
+              final text = locationController.text.trim();
+              if (text.isNotEmpty) {
+                final translation = await TranslationService().translate(text);
+                if (translation != null) {
+                  locationEnController.text = translation;
+                }
+              }
+            },
+          ),
         ),
         const SizedBox(height: 15),
         UniversitiesSelectorSection(

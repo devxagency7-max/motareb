@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'add_property_helpers.dart';
+import '../../services/translation_service.dart';
 
 class DescriptionCard extends StatelessWidget {
   final TextEditingController descriptionController;
@@ -30,6 +31,18 @@ class DescriptionCard extends StatelessWidget {
           controller: descriptionEnController,
           maxLines: 4,
           textDirection: TextDirection.ltr,
+          suffix: IconButton(
+            icon: const Icon(Icons.translate, color: Color(0xFF39BB5E)),
+            onPressed: () async {
+              final text = descriptionController.text.trim();
+              if (text.isNotEmpty) {
+                final translation = await TranslationService().translate(text);
+                if (translation != null) {
+                  descriptionEnController.text = translation;
+                }
+              }
+            },
+          ),
         ),
       ],
     );

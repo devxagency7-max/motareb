@@ -59,6 +59,7 @@ class CustomTextField extends StatelessWidget {
   final IconData? icon;
   final Function(String)? onChanged;
   final TextDirection? textDirection;
+  final Widget? suffix;
 
   const CustomTextField({
     super.key,
@@ -71,6 +72,7 @@ class CustomTextField extends StatelessWidget {
     this.icon,
     this.onChanged,
     this.textDirection,
+    this.suffix,
   });
 
   @override
@@ -91,6 +93,7 @@ class CustomTextField extends StatelessWidget {
         prefixIcon: icon != null
             ? Icon(icon, color: const Color(0xFF008695), size: 20)
             : null,
+        suffixIcon: suffix,
         filled: true,
         fillColor: Colors.grey.shade50,
         contentPadding: const EdgeInsets.symmetric(
