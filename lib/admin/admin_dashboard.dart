@@ -11,6 +11,7 @@ import 'admin_reservations_screen.dart';
 import 'admin_universities_screen.dart';
 import 'admin_verification_screen.dart';
 import 'admin_contact_numbers_screen.dart';
+import 'admin_ads_list_screen.dart';
 import 'package:admin_motareb/core/utils/loc_extension.dart';
 import 'package:admin_motareb/core/providers/locale_provider.dart';
 import 'package:admin_motareb/core/providers/theme_provider.dart';
@@ -284,14 +285,10 @@ class AdminDashboard extends StatelessWidget {
                     icon: Icons.campaign_rounded,
                     color: Colors.amber,
                     onTap: () {
-                      // TODO: Implement Ads management screen
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            context.loc.ads + " - Coming Soon / قريباً",
-                            style: GoogleFonts.cairo(),
-                          ),
-                          backgroundColor: const Color(0xFF008695),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AdminAdsListScreen(),
                         ),
                       );
                     },

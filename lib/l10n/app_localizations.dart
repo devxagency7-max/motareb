@@ -661,6 +661,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Manage Ads and Spaces'**
   String get manageAds;
+
+  /// No description provided for @addAd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Ad or Space'**
+  String get addAd;
+
+  /// No description provided for @adName.
+  ///
+  /// In en, this message translates to:
+  /// **'Place / Ad Name'**
+  String get adName;
+
+  /// No description provided for @adDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Ad Description'**
+  String get adDescription;
+
+  /// No description provided for @adAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Detailed Address'**
+  String get adAddress;
+
+  /// No description provided for @adType.
+  ///
+  /// In en, this message translates to:
+  /// **'Ad Type / Category'**
+  String get adType;
+
+  /// No description provided for @phoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone Number'**
+  String get phoneNumber;
+
+  /// No description provided for @whatsappNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp Number'**
+  String get whatsappNumber;
+
+  /// No description provided for @activeStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status (Active)'**
+  String get activeStatus;
+
+  /// No description provided for @translateToEn.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate to English'**
+  String get translateToEn;
+
+  /// No description provided for @adImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Place / Ad Images 📸'**
+  String get adImages;
+
+  /// No description provided for @pickType.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick Type'**
+  String get pickType;
+
+  /// No description provided for @nameAr.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (Arabic)'**
+  String get nameAr;
+
+  /// No description provided for @nameEn.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (English)'**
+  String get nameEn;
+
+  /// No description provided for @descAr.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (Arabic)'**
+  String get descAr;
+
+  /// No description provided for @descEn.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (English)'**
+  String get descEn;
+
+  /// No description provided for @addrAr.
+  ///
+  /// In en, this message translates to:
+  /// **'Address (Arabic)'**
+  String get addrAr;
+
+  /// No description provided for @addrEn.
+  ///
+  /// In en, this message translates to:
+  /// **'Address (English)'**
+  String get addrEn;
+
+  /// No description provided for @sponsored.
+  ///
+  /// In en, this message translates to:
+  /// **'Sponsored Ad'**
+  String get sponsored;
+
+  /// No description provided for @banner.
+  ///
+  /// In en, this message translates to:
+  /// **'Ad Banner'**
+  String get banner;
+
+  /// No description provided for @localStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Local Store / Restaurant'**
+  String get localStore;
+
+  /// No description provided for @other.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get other;
+
+  /// No description provided for @noAdsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No ads found yet'**
+  String get noAdsFound;
+
+  /// No description provided for @deleteAd.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Ad'**
+  String get deleteAd;
+
+  /// No description provided for @deleteAdConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this ad? This action cannot be undone.'**
+  String get deleteAdConfirm;
+
+  /// No description provided for @editAd.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Ad'**
+  String get editAd;
+
+  /// No description provided for @googleMapLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Map Location Link'**
+  String get googleMapLink;
+
+  /// No description provided for @enterGoogleMapLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste Google Maps link here (optional)'**
+  String get enterGoogleMapLink;
 }
 
 class _AppLocalizationsDelegate

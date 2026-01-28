@@ -292,4 +292,86 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get manageAds => 'إدارة الإعلانات والمساحات';
+
+  @override
+  String get addAd => 'إضافة إعلان أو مساحة';
+
+  @override
+  String get adName => 'اسم المكان / الإعلان';
+
+  @override
+  String get adDescription => 'وصف الإعلان';
+
+  @override
+  String get adAddress => 'العنوان بالتفصيل';
+
+  @override
+  String get adType => 'نوع الإعلان / الفئة';
+
+  @override
+  String get phoneNumber => 'رقم الهاتف';
+
+  @override
+  String get whatsappNumber => 'رقم الواتساب';
+
+  @override
+  String get activeStatus => 'الحالة (نشط)';
+
+  @override
+  String get translateToEn => 'ترجمة للإنجليزية';
+
+  @override
+  String get adImages => 'صور للمكان / الإعلان 📸';
+
+  @override
+  String get pickType => 'اختر النوع';
+
+  @override
+  String get nameAr => 'الاسم (بالعربي)';
+
+  @override
+  String get nameEn => 'Name (English)';
+
+  @override
+  String get descAr => 'الوصف (بالعربي)';
+
+  @override
+  String get descEn => 'Description (English)';
+
+  @override
+  String get addrAr => 'العنوان (بالعربي)';
+
+  @override
+  String get addrEn => 'Address (English)';
+
+  @override
+  String get sponsored => 'إعلان ممول';
+
+  @override
+  String get banner => 'بنر إعلاني';
+
+  @override
+  String get localStore => 'محل محلي / مطعم';
+
+  @override
+  String get other => 'أخرى';
+
+  @override
+  String get noAdsFound => 'لا توجد إعلانات مضافة بعد';
+
+  @override
+  String get deleteAd => 'حذف الإعلان';
+
+  @override
+  String get deleteAdConfirm =>
+      'هل أنت متأكد من حذف هذا الإعلان؟ لا يمكن التراجع عن هذه الخطوة.';
+
+  @override
+  String get editAd => 'تعديل الإعلان';
+
+  @override
+  String get googleMapLink => 'رابط لوكيشن جوجل ماب';
+
+  @override
+  String get enterGoogleMapLink => 'ضع رابط خرائط جوجل هنا (اختياري)';
 }

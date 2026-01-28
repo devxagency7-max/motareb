@@ -295,4 +295,86 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get manageAds => 'Manage Ads and Spaces';
+
+  @override
+  String get addAd => 'Add Ad or Space';
+
+  @override
+  String get adName => 'Place / Ad Name';
+
+  @override
+  String get adDescription => 'Ad Description';
+
+  @override
+  String get adAddress => 'Detailed Address';
+
+  @override
+  String get adType => 'Ad Type / Category';
+
+  @override
+  String get phoneNumber => 'Phone Number';
+
+  @override
+  String get whatsappNumber => 'WhatsApp Number';
+
+  @override
+  String get activeStatus => 'Status (Active)';
+
+  @override
+  String get translateToEn => 'Translate to English';
+
+  @override
+  String get adImages => 'Place / Ad Images 📸';
+
+  @override
+  String get pickType => 'Pick Type';
+
+  @override
+  String get nameAr => 'Name (Arabic)';
+
+  @override
+  String get nameEn => 'Name (English)';
+
+  @override
+  String get descAr => 'Description (Arabic)';
+
+  @override
+  String get descEn => 'Description (English)';
+
+  @override
+  String get addrAr => 'Address (Arabic)';
+
+  @override
+  String get addrEn => 'Address (English)';
+
+  @override
+  String get sponsored => 'Sponsored Ad';
+
+  @override
+  String get banner => 'Ad Banner';
+
+  @override
+  String get localStore => 'Local Store / Restaurant';
+
+  @override
+  String get other => 'Other';
+
+  @override
+  String get noAdsFound => 'No ads found yet';
+
+  @override
+  String get deleteAd => 'Delete Ad';
+
+  @override
+  String get deleteAdConfirm =>
+      'Are you sure you want to delete this ad? This action cannot be undone.';
+
+  @override
+  String get editAd => 'Edit Ad';
+
+  @override
+  String get googleMapLink => 'Google Map Location Link';
+
+  @override
+  String get enterGoogleMapLink => 'Paste Google Maps link here (optional)';
 }
