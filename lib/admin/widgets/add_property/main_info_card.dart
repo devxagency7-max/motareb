@@ -18,6 +18,7 @@ class MainInfoCard extends StatelessWidget {
   final TextEditingController customUniversityController;
   final TextEditingController customUniversityEnController;
   final TextEditingController depositController; // Added
+  final ValueNotifier<bool> bookingEnabledNotifier; // Added
 
   const MainInfoCard({
     super.key,
@@ -34,6 +35,7 @@ class MainInfoCard extends StatelessWidget {
     required this.customUniversityController,
     required this.customUniversityEnController,
     required this.depositController,
+    required this.bookingEnabledNotifier,
   });
 
   static const List<String> _governorates = [
@@ -233,6 +235,35 @@ class MainInfoCard extends StatelessWidget {
           textDirection: TextDirection.ltr,
           maxLines: null,
           minLines: 1,
+        ),
+        const SizedBox(height: 20),
+        const Divider(),
+        ValueListenableBuilder<bool>(
+          valueListenable: bookingEnabledNotifier,
+          builder: (context, isEnabled, child) {
+            return SwitchListTile(
+              value: isEnabled,
+              onChanged: (val) => bookingEnabledNotifier.value = val,
+              title: Text(
+                'تفعيل الحجز المباشر',
+                style: GoogleFonts.cairo(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              subtitle: Text(
+                'إذا تم الإغلاق، لن يظهر زر "احجز الآن" للمستخدمين',
+                style: GoogleFonts.cairo(fontSize: 13),
+              ),
+              activeColor: const Color(0xFF39BB5E),
+              secondary: Icon(
+                isEnabled
+                    ? Icons.calendar_today
+                    : Icons.calendar_today_outlined,
+                color: isEnabled ? const Color(0xFF39BB5E) : Colors.grey,
+              ),
+            );
+          },
         ),
       ],
     );

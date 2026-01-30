@@ -48,6 +48,7 @@ class Property {
   final List<String> images;
   final List<Map<String, dynamic>> rooms; // Added for new units structure
   final double? requiredDeposit; // Added
+  final bool bookingEnabled; // Added
 
   // Helpers
   bool get hasAC {
@@ -108,6 +109,7 @@ class Property {
     this.bedPrice = 0.0,
     this.generalRoomType,
     this.requiredDeposit,
+    this.bookingEnabled = true,
   });
 
   factory Property.fromSnapshot(QueryDocumentSnapshot doc) {
@@ -187,6 +189,7 @@ class Property {
       bedPrice: (map['bedPrice'] as num?)?.toDouble() ?? 0.0,
       generalRoomType: map['generalRoomType'],
       requiredDeposit: (map['requiredDeposit'] as num?)?.toDouble(),
+      bookingEnabled: map['bookingEnabled'] ?? true,
     );
   }
 
@@ -233,6 +236,7 @@ class Property {
       'bedPrice': bedPrice,
       'generalRoomType': generalRoomType,
       'requiredDeposit': requiredDeposit,
+      'bookingEnabled': bookingEnabled,
     };
   }
 }

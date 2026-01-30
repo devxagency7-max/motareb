@@ -83,6 +83,7 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
   );
 
   final ValueNotifier<bool> _isLoadingNotifier = ValueNotifier(false);
+  final ValueNotifier<bool> _bookingEnabledNotifier = ValueNotifier(true);
 
   final ImagePicker _picker = ImagePicker();
 
@@ -200,6 +201,7 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
         : '';
     _roomTypeController.text = p.generalRoomType ?? '';
     _bedPriceController.text = p.bedPrice > 0 ? p.bedPrice.toString() : '';
+    _bookingEnabledNotifier.value = p.bookingEnabled;
   }
 
   @override
@@ -243,6 +245,7 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
     _selectedUniversitiesNotifier.dispose();
     _selectedGovernorateNotifier.dispose();
     _isLoadingNotifier.dispose();
+    _bookingEnabledNotifier.dispose();
     super.dispose();
   }
 
@@ -371,6 +374,7 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
                   (int.tryParse(_totalBedsController.text.trim()) ?? 1)
             : 0.0,
         'generalRoomType': _roomTypeController.text.trim(),
+        'bookingEnabled': _bookingEnabledNotifier.value,
       };
 
       if (widget.propertyToEdit != null) {
@@ -606,6 +610,7 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
                 customUniversityController: _customUniversityController,
                 customUniversityEnController: _customUniversityEnController,
                 depositController: _depositController,
+                bookingEnabledNotifier: _bookingEnabledNotifier,
               ),
               const SizedBox(height: 20),
 
