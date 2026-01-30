@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:admin_motareb/admin/admin_add_properties_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -276,19 +277,7 @@ class _AdminAllPropertiesScreenState extends State<AdminAllPropertiesScreen> {
               width: 90,
               height: 90,
               child: property.images.isNotEmpty
-                  ? (property.images.first.startsWith('http')
-                        ? Image.network(
-                            property.images.first,
-                            fit: BoxFit.cover,
-                          )
-                        : Image.memory(
-                            const Base64Decoder().convert(
-                              property.images.first,
-                            ),
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.broken_image),
-                          ))
+                  ? _buildPropertyImage(property.images.first)
                   : Image.asset('assets/images/intro2.png', fit: BoxFit.cover),
             ),
           ),
@@ -316,7 +305,9 @@ class _AdminAllPropertiesScreenState extends State<AdminAllPropertiesScreen> {
                   ],
                 ),
                 const SizedBox(height: 5),
-                Row(
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -345,7 +336,6 @@ class _AdminAllPropertiesScreenState extends State<AdminAllPropertiesScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 6,
@@ -406,5 +396,36 @@ class _AdminAllPropertiesScreenState extends State<AdminAllPropertiesScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildPropertyImage(String imageSource) {
+    if (imageSource.startsWith('http')) {
+      return Image.network(
+        imageSource,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) =>
+            const Icon(Icons.broken_image),
+      );
+    }
+
+    if (imageSource.startsWith('/') || imageSource.startsWith('file')) {
+      return Image.file(
+        File(imageSource),
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) =>
+            const Icon(Icons.broken_image),
+      );
+    }
+
+    try {
+      return Image.memory(
+        base64Decode(imageSource),
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) =>
+            const Icon(Icons.broken_image),
+      );
+    } catch (e) {
+      return const Icon(Icons.broken_image);
+    }
   }
 }

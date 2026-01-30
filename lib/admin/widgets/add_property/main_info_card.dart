@@ -17,6 +17,7 @@ class MainInfoCard extends StatelessWidget {
   final ValueNotifier<List<Map<String, dynamic>>> universitiesNotifier;
   final TextEditingController customUniversityController;
   final TextEditingController customUniversityEnController;
+  final TextEditingController depositController; // Added
 
   const MainInfoCard({
     super.key,
@@ -32,6 +33,7 @@ class MainInfoCard extends StatelessWidget {
     required this.universitiesNotifier,
     required this.customUniversityController,
     required this.customUniversityEnController,
+    required this.depositController,
   });
 
   static const List<String> _governorates = [
@@ -115,6 +117,14 @@ class MainInfoCard extends StatelessWidget {
           controller: discountPriceController,
           keyboardType: TextInputType.number,
           icon: Icons.local_offer_outlined,
+        ),
+        const SizedBox(height: 15),
+        CustomTextField(
+          label: 'العربون المطلوب',
+          hint: 'مثال 200 أو 300',
+          controller: depositController,
+          keyboardType: TextInputType.number,
+          icon: Icons.payments_outlined,
         ),
         const SizedBox(height: 15),
         ValueListenableBuilder<String>(

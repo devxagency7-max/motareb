@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import '../core/models/property_model.dart';
-import 'admin_add_properties_screen.dart';
+import 'admin_review_property_screen.dart';
 
 class AdminPendingPropertiesScreen extends StatelessWidget {
   const AdminPendingPropertiesScreen({super.key});
@@ -27,8 +27,7 @@ class AdminPendingPropertiesScreen extends StatelessWidget {
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
-            .collection('properties')
-            .where('status', isEqualTo: 'pending')
+            .collection('pending_properties')
             .orderBy('createdAt', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
@@ -93,8 +92,7 @@ class AdminPendingPropertiesScreen extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                AdminAddPropertyScreen(propertyToEdit: property),
+            builder: (context) => AdminReviewPropertyScreen(property: property),
           ),
         );
       },

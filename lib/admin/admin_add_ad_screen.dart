@@ -85,7 +85,9 @@ class _AdminAddAdScreenState extends State<AdminAddAdScreen> {
   ) async {
     if (source.text.isEmpty) return;
     setState(() => _isLoading = true);
-    final translation = await TranslationService.translateToArabic(source.text);
+    final translation = await TranslationService.translateToEnglish(
+      source.text,
+    );
     target.text = translation;
     setState(() => _isLoading = false);
   }

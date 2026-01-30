@@ -209,6 +209,11 @@ class AdminVerificationScreen extends StatelessWidget {
                       context,
                     ),
                     _buildInfoTile(
+                      'رقم الهاتف',
+                      user['phone'] ?? 'غير متوفر',
+                      context,
+                    ),
+                    _buildInfoTile(
                       'مكان الإقامة',
                       user['residence'] ?? 'غير متوفر',
                       context,

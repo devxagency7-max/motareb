@@ -33,6 +33,7 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
   final _titleEnController = TextEditingController(); // NEW
   final _priceController = TextEditingController();
   final _discountPriceController = TextEditingController();
+  final _depositController = TextEditingController(); // NEW
   final _locationController = TextEditingController();
   final _locationEnController = TextEditingController(); // NEW
   final _descriptionController = TextEditingController();
@@ -146,6 +147,7 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
     _titleEnController.text = p.titleEn;
     _priceController.text = p.price.toString();
     _discountPriceController.text = p.discountPrice?.toString() ?? '';
+    _depositController.text = p.requiredDeposit?.toString() ?? '';
     _locationController.text = p.location;
     _locationEnController.text = p.locationEn;
     _descriptionController.text = p.description ?? '';
@@ -209,6 +211,7 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
     _titleEnController.dispose();
     _priceController.dispose();
     _discountPriceController.dispose();
+    _depositController.dispose();
     _locationController.dispose();
     _locationEnController.dispose();
     _descriptionController.dispose();
@@ -308,6 +311,9 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
         'price': double.tryParse(_priceController.text.trim()) ?? 0.0,
         'discountPrice': _discountPriceController.text.trim().isNotEmpty
             ? double.tryParse(_discountPriceController.text.trim())
+            : null,
+        'requiredDeposit': _depositController.text.trim().isNotEmpty
+            ? double.tryParse(_depositController.text.trim())
             : null,
         'location': _locationController.text.trim().isEmpty
             ? 'غير محدد'
@@ -599,6 +605,7 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
                 universitiesNotifier: _selectedUniversitiesNotifier,
                 customUniversityController: _customUniversityController,
                 customUniversityEnController: _customUniversityEnController,
+                depositController: _depositController,
               ),
               const SizedBox(height: 20),
 

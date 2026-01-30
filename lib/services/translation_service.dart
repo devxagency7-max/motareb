@@ -6,7 +6,7 @@ class TranslationService {
     targetLanguage: TranslateLanguage.english,
   );
 
-  static Future<String> translateToArabic(String text) async {
+  static Future<String> translateToEnglish(String text) async {
     try {
       if (text.isEmpty) return '';
       final result = await _translator.translateText(text);
