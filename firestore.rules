@@ -24,7 +24,8 @@ service cloud.firestore {
       allow read: if true;
       
       // Only Admin can create, update, or delete
-      allow write: if isAdmin();
+      // TEMPORARY: Allow any authenticated user for testing
+      allow write: if isAuth(); // isAdmin();
     }
 
     // ================= UNIVERSITIES =================
@@ -45,6 +46,13 @@ service cloud.firestore {
     // ================= CONTACT NUMBERS =================
     match /contact_numbers/{numberId} {
       allow read, write: if true;
+    }
+
+    // ================= BOOKINGS =================
+    match /bookings/{bookingId} {
+      allow read: if isAuth() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin();
     }
     
     // Default: Deny

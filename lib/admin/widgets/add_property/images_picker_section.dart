@@ -68,6 +68,13 @@ class _ImagesPickerSectionState extends State<ImagesPickerSection> {
         final url = await _uploadService.uploadFile(
           file,
           propertyId: formattedId,
+          onProgress: (sent, total) {
+            if (mounted) {
+              setState(() {
+                _uploadProgress[file.path] = sent / total;
+              });
+            }
+          },
         );
 
         if (mounted) {

@@ -536,7 +536,7 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
                             if (val.text.isEmpty) {
                               return const SizedBox.shrink();
                             }
-                            final previewId = 'T-${val.text}Z';
+                            final previewId = 'T${val.text}Z';
                             return Padding(
                               padding: const EdgeInsets.only(top: 8.0),
                               child: Row(
