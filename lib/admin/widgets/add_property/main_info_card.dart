@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'add_property_helpers.dart';
 import 'universities_selector_section.dart';
+import 'nearby_places_selector_section.dart';
 import '../../services/translation_service.dart';
 
 class MainInfoCard extends StatelessWidget {
@@ -15,8 +16,11 @@ class MainInfoCard extends StatelessWidget {
   final TextEditingController featuredLabelEnController;
   final ValueNotifier<String> governorateNotifier;
   final ValueNotifier<List<Map<String, dynamic>>> universitiesNotifier;
+  final ValueNotifier<List<Map<String, dynamic>>> nearbyPlacesNotifier; // Added
   final TextEditingController customUniversityController;
   final TextEditingController customUniversityEnController;
+  final TextEditingController customNearbyPlaceController; // Added
+  final TextEditingController customNearbyPlaceEnController; // Added
   final TextEditingController depositController; // Added
   final ValueNotifier<bool> bookingEnabledNotifier; // Added
 
@@ -32,8 +36,11 @@ class MainInfoCard extends StatelessWidget {
     required this.featuredLabelEnController,
     required this.governorateNotifier,
     required this.universitiesNotifier,
+    required this.nearbyPlacesNotifier,
     required this.customUniversityController,
     required this.customUniversityEnController,
+    required this.customNearbyPlaceController,
+    required this.customNearbyPlaceEnController,
     required this.depositController,
     required this.bookingEnabledNotifier,
   });
@@ -97,6 +104,7 @@ class MainInfoCard extends StatelessWidget {
               final text = titleController.text.trim();
               if (text.isNotEmpty) {
                 final translation = await TranslationService().translate(text);
+                if (!context.mounted) return;
                 if (translation != null) {
                   titleEnController.text = translation;
                 }
@@ -204,6 +212,7 @@ class MainInfoCard extends StatelessWidget {
               final text = locationController.text.trim();
               if (text.isNotEmpty) {
                 final translation = await TranslationService().translate(text);
+                if (!context.mounted) return;
                 if (translation != null) {
                   locationEnController.text = translation;
                 }
@@ -216,6 +225,12 @@ class MainInfoCard extends StatelessWidget {
           selectedUniversitiesNotifier: universitiesNotifier,
           customUniversityController: customUniversityController,
           customUniversityEnController: customUniversityEnController,
+        ),
+        const SizedBox(height: 15),
+        NearbyPlacesSelectorSection(
+          selectedPlacesNotifier: nearbyPlacesNotifier,
+          customPlaceController: customNearbyPlaceController,
+          customPlaceEnController: customNearbyPlaceEnController,
         ),
         const SizedBox(height: 15),
         CustomTextField(

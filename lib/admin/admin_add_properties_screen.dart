@@ -50,6 +50,8 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
   final _customAmenityEnController = TextEditingController();
   final _customUniversityController = TextEditingController();
   final _customUniversityEnController = TextEditingController();
+  final _customNearbyPlaceController = TextEditingController(); // NEW
+  final _customNearbyPlaceEnController = TextEditingController(); // NEW
 
   // --- Booking Modes State ---
   final ValueNotifier<String> _bookingModeNotifier = ValueNotifier('unit');
@@ -78,6 +80,8 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
   final ValueNotifier<List<String>> _paymentMethodsNotifier = ValueNotifier([]);
   final ValueNotifier<List<Map<String, dynamic>>>
   _selectedUniversitiesNotifier = ValueNotifier([]);
+  final ValueNotifier<List<Map<String, dynamic>>>
+  _selectedNearbyPlacesNotifier = ValueNotifier([]); // NEW
   final ValueNotifier<String> _selectedGovernorateNotifier = ValueNotifier(
     'بني سويف',
   );
@@ -122,15 +126,17 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
           .doc(potentialId)
           .get();
 
+      if (!mounted) return;
+
       if (doc.exists) {
         _idErrorNotifier.value = 'لا يمكن الاستخدام ⛔';
       } else {
         _idErrorNotifier.value = null;
       }
     } catch (e) {
-      _idErrorNotifier.value = null;
+      if (mounted) _idErrorNotifier.value = null;
     } finally {
-      _isCheckingIdNotifier.value = false;
+      if (mounted) _isCheckingIdNotifier.value = false;
     }
   }
 
@@ -183,6 +189,13 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
         })
         .toList();
 
+    _selectedNearbyPlacesNotifier.value = p.nearbyPlaces
+        .map<Map<String, dynamic>>((e) {
+          if (e is Map) return Map<String, dynamic>.from(e);
+          return {'ar': e.toString(), 'en': e.toString()};
+        })
+        .toList();
+
     List<String> types = [];
     if (p.unitTypes.isNotEmpty) {
       types = List.from(p.unitTypes);
@@ -228,6 +241,8 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
     _customAmenityEnController.dispose();
     _customUniversityController.dispose();
     _customUniversityEnController.dispose();
+    _customNearbyPlaceController.dispose();
+    _customNearbyPlaceEnController.dispose();
     _bookingModeNotifier.dispose();
     _isFullApartmentNotifier.dispose();
     _totalBedsController.dispose();
@@ -243,6 +258,7 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
     _selectedGenderNotifier.dispose();
     _paymentMethodsNotifier.dispose();
     _selectedUniversitiesNotifier.dispose();
+    _selectedNearbyPlacesNotifier.dispose();
     _selectedGovernorateNotifier.dispose();
     _isLoadingNotifier.dispose();
     _bookingEnabledNotifier.dispose();
@@ -353,6 +369,7 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
         'gender': _selectedGenderNotifier.value,
         'paymentMethods': _paymentMethodsNotifier.value,
         'universities': _selectedUniversitiesNotifier.value,
+        'nearbyPlaces': _selectedNearbyPlacesNotifier.value,
         'bedsCount': _roomsNotifier.value.fold<int>(
           0,
           (total, room) => total + (room['beds'] as int? ?? 0),
@@ -607,8 +624,13 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
                 featuredLabelEnController: _featuredLabelEnController,
                 governorateNotifier: _selectedGovernorateNotifier,
                 universitiesNotifier: _selectedUniversitiesNotifier,
+                nearbyPlacesNotifier: _selectedNearbyPlacesNotifier, // NEW
                 customUniversityController: _customUniversityController,
                 customUniversityEnController: _customUniversityEnController,
+                customNearbyPlaceController:
+                    _customNearbyPlaceController, // NEW
+                customNearbyPlaceEnController:
+                    _customNearbyPlaceEnController, // NEW
                 depositController: _depositController,
                 bookingEnabledNotifier: _bookingEnabledNotifier,
               ),

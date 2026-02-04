@@ -294,11 +294,15 @@ exports.paymobWebhook = onRequest(
     try {
       const data = req.body.obj || req.body;
       const hmacSecret = PAYMOB_HMAC.value();
-      const receivedHmac = req.query.hmac;
+      const receivedHmac = req.query.hmac || data.hmac;
 
-      if (!data || !receivedHmac) return res.status(400).send("No data");
+      console.log("WEBHOOK HIT");
 
-      // HMAC verification for Transaction Webhook
+      if (!data || !receivedHmac) {
+        console.error("Missing data or hmac");
+        return res.status(400).send("No data");
+      }
+
       const str =
         (data.amount_cents || "") +
         (data.created_at || "") +
@@ -327,7 +331,7 @@ exports.paymobWebhook = onRequest(
         .digest("hex");
 
       if (calculatedHmac !== receivedHmac) {
-        console.error("🔥 HMAC VALIDATION FAILED");
+        console.error("🔥 HMAC FAILED");
         return res.status(401).send("Invalid HMAC");
       }
 
@@ -339,71 +343,57 @@ exports.paymobWebhook = onRequest(
       const db = admin.firestore();
       const paymentRef = db.collection("payments").doc(paymentId);
 
-      try {
-        await db.runTransaction(async (t) => {
-          const paymentSnap = await t.get(paymentRef);
-          if (!paymentSnap.exists) {
-            throw new Error("Payment Document Not Found");
-          }
+      await db.runTransaction(async (t) => {
+        const paymentSnap = await t.get(paymentRef);
+        if (!paymentSnap.exists) throw new Error("Payment not found");
 
-          const payment = paymentSnap.data();
+        const payment = paymentSnap.data();
+        if (payment.status === "paid") return;
 
-          // Idempotency Check
-          if (payment.status === "paid" || (payment.externalId && payment.externalId === data.id.toString())) {
-            console.log("Duplicate Webhook/Transaction - Already Processed");
-            return;
-          }
-
-          if (success) {
-            // Update Payment
-            t.update(paymentRef, {
-              status: "paid",
-              externalId: data.id.toString(),
-              paymobOrderId: data.order?.id?.toString(),
-              paidAt: admin.firestore.FieldValue.serverTimestamp()
-            });
-
-            // Update Booking & Property
-            const bookingRef = db.collection("bookings").doc(payment.bookingId);
-            const bSnap = await t.get(bookingRef);
-
-            if (bSnap.exists) {
-              const booking = bSnap.data();
-              const propRef = db.collection("properties").doc(booking.propertyId);
-
-              if (payment.type === "deposit") {
-                const exp = new Date();
-                exp.setDate(exp.getDate() + 7);
-                t.update(bookingRef, {
-                  status: "reserved",
-                  depositPaid: payment.amount,
-                  expiresAt: admin.firestore.Timestamp.fromDate(exp)
-                });
-                t.update(propRef, { status: "reserved" });
-              } else if (payment.type === "remaining") {
-                t.update(bookingRef, { status: "completed" });
-                t.update(propRef, { status: "sold" });
-              }
-            }
-          } else {
-            // Failed Payment
-            t.update(paymentRef, {
-              status: "failed",
-              externalId: data.id.toString()
-            });
-          }
+        t.update(paymentRef, {
+          status: success ? "paid" : "failed",
+          externalId: data.id.toString(),
+          paidAt: admin.firestore.FieldValue.serverTimestamp()
         });
 
-        res.status(200).send("OK");
-      } catch (e) {
-        console.error("Webhook Error:", e);
-        res.status(500).send("Error");
-      }
+        if (!success) return;
 
-      res.status(200).send("OK");
+        const bookingRef = db.collection("bookings").doc(payment.bookingId);
+        const bookingSnap = await t.get(bookingRef);
+        if (!bookingSnap.exists) return;
+
+        const booking = bookingSnap.data();
+        const propRef = db.collection("properties").doc(booking.propertyId);
+
+        if (payment.type === "deposit") {
+          const exp = new Date();
+          exp.setDate(exp.getDate() + 7);
+
+          t.update(bookingRef, {
+            status: "reserved",
+            firstPaid: true,
+            secondPaid: false,
+            depositPaid: payment.amount,
+            expiresAt: admin.firestore.Timestamp.fromDate(exp)
+          });
+
+          t.update(propRef, { status: "reserved" });
+
+        } else if (payment.type === "remaining") {
+          t.update(bookingRef, {
+            status: "completed",
+            secondPaid: true
+          });
+
+          t.update(propRef, { status: "sold" });
+        }
+      });
+
+      return res.status(200).send("OK");
+
     } catch (e) {
       console.error("Webhook Error:", e);
-      res.status(500).send("Error");
+      return res.status(500).send("Error");
     }
   }
 );
@@ -486,7 +476,7 @@ exports.createRemainingPayment = onCall(
 
     return {
       paymentId,
-      amount,
+      amount: booking.remainingAmount,
       paymentToken,
       iframeId: PAYMOB_IFRAME_ID.value()
     };
@@ -514,5 +504,6 @@ exports.expireBookings = onSchedule(
     snap.docs.forEach(d => batch.update(d.ref, { status: "expired" }));
     await batch.commit();
   });
+
 
 

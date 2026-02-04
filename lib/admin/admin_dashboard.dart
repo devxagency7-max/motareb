@@ -9,7 +9,7 @@ import '../features/chat/screens/admin_chat_list_screen.dart';
 import 'admin_users_screen.dart';
 import 'admin_reservations_screen.dart';
 import 'admin_universities_screen.dart';
-import 'admin_verification_screen.dart';
+
 import 'admin_contact_numbers_screen.dart';
 import 'admin_ads_list_screen.dart';
 import 'package:admin_motareb/core/utils/loc_extension.dart';
@@ -247,21 +247,7 @@ class AdminDashboard extends StatelessWidget {
                     color: Colors.grey,
                     onTap: () {},
                   ),
-                  _buildDashboardCard(
-                    context,
-                    title: context.loc.verification,
-                    subtitle: context.loc.identityRequests,
-                    icon: Icons.verified_user_outlined,
-                    color: Colors.redAccent,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const AdminVerificationScreen(),
-                        ),
-                      );
-                    },
-                  ),
+
                   _buildDashboardCard(
                     context,
                     title: context.loc.numbers,

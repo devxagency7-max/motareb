@@ -37,6 +37,7 @@ class DescriptionCard extends StatelessWidget {
               final text = descriptionController.text.trim();
               if (text.isNotEmpty) {
                 final translation = await TranslationService().translate(text);
+                if (!context.mounted) return;
                 if (translation != null) {
                   descriptionEnController.text = translation;
                 }

@@ -1,12 +1,16 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:admin_motareb/utils/custom_snackbar.dart';
+import 'package:admin_motareb/services/r2_upload_service.dart';
 
 class AdminAddPropertyController extends ChangeNotifier {
+  // Services
+  final R2UploadService _r2Service = R2UploadService();
+  final ImagePicker _picker = ImagePicker();
+
   // Text Controllers
   final titleController = TextEditingController();
   final titleEnController = TextEditingController(); // NEW
@@ -28,9 +32,8 @@ class AdminAddPropertyController extends ChangeNotifier {
   final customAmenityController = TextEditingController();
   final customUniversityController = TextEditingController();
 
-  // Multi-Image Upload
-  final List<String> base64Images = [];
-  final ImagePicker _picker = ImagePicker();
+  // Selected Images (Files instead of Base64)
+  final List<File> selectedImageFiles = [];
 
   // Dynamic Lists
   final List<String> amenities = [];
@@ -87,6 +90,7 @@ class AdminAddPropertyController extends ChangeNotifier {
 
   String selectedGovernorate = 'بني سويف';
   bool isLoading = false;
+  String loadingStatus = ''; // NEW: To show progress in UI
 
   void setGovernorate(String? val) {
     if (val != null) {
@@ -132,9 +136,7 @@ class AdminAddPropertyController extends ChangeNotifier {
       final List<XFile> images = await _picker.pickMultiImage();
       if (images.isNotEmpty) {
         for (var image in images) {
-          final bytes = await File(image.path).readAsBytes();
-          final String base64String = base64Encode(bytes);
-          base64Images.add(base64String);
+          selectedImageFiles.add(File(image.path));
         }
         notifyListeners();
       }
@@ -150,13 +152,13 @@ class AdminAddPropertyController extends ChangeNotifier {
   }
 
   void removeImage(int index) {
-    base64Images.removeAt(index);
+    selectedImageFiles.removeAt(index);
     notifyListeners();
   }
 
   Future<void> submitProperty(BuildContext context) async {
     // Validate
-    if (base64Images.isEmpty) {
+    if (selectedImageFiles.isEmpty) {
       CustomSnackBar.show(
         context: context,
         message: 'يجب إضافة صورة واحدة على الأقل 📸',
@@ -193,11 +195,29 @@ class AdminAddPropertyController extends ChangeNotifier {
     }
 
     isLoading = true;
+    loadingStatus = 'بدء عملية النشر...';
     notifyListeners();
 
     try {
       final user = FirebaseAuth.instance.currentUser;
       final String uid = user?.uid ?? 'admin_override_id';
+
+      // 1. Upload images to R2 one by one
+      List<String> imageUrls = [];
+      for (int i = 0; i < selectedImageFiles.length; i++) {
+        loadingStatus =
+            'جاري رفع الصورة ${i + 1} من ${selectedImageFiles.length}...';
+        notifyListeners();
+
+        final url = await _r2Service.uploadFile(
+          selectedImageFiles[i],
+          propertyId: 'temp_admin_upload', // Will be grouped later if needed
+        );
+        imageUrls.add(url);
+      }
+
+      loadingStatus = 'جاري حفظ بيانات العقار...';
+      notifyListeners();
 
       final propertyData = {
         'ownerId': uid,
@@ -224,7 +244,7 @@ class AdminAddPropertyController extends ChangeNotifier {
         'featuredLabelEn': featuredLabelEnController.text.trim().isEmpty
             ? featuredLabelController.text.trim()
             : featuredLabelEnController.text.trim(),
-        'images': base64Images,
+        'images': imageUrls, // URLs instead of Base64
         'amenities': amenities,
         'rules': rules,
         'isBed': selectedUnitTypes.contains('bed'),
@@ -271,6 +291,7 @@ class AdminAddPropertyController extends ChangeNotifier {
       }
     } finally {
       isLoading = false;
+      loadingStatus = '';
       notifyListeners();
     }
   }
@@ -279,25 +300,7 @@ class AdminAddPropertyController extends ChangeNotifier {
   Future<void> addNewUniversity(BuildContext context, String name) async {
     if (name.trim().isEmpty) return;
 
-    // We don't need to check duplicates locally as we fetch from DB,
-    // but good to show feedback.
-    // The previous logic checked duplicate names against UI list.
-    // We can do that in UI or here if we pass the list.
-    // For simplicity, we just add it to firestore, and selection logic is in UI/Controller.
-
-    // Note: The UI logic had the check. We should ideally move that check here
-    // but the list of *available* universities comes from a Stream in the UI.
-    // So the controller doesn't automatically know all available universities unless we stream it here.
-    // To keep it simple as requested, let's keep the stream in the UI (View)
-    // and just call a simple add method here, or pass the list to this method.
-
     try {
-      // Check if exists logic is better handled where data is available.
-      // We'll trust the caller for now or just add it.
-      // Actually, to fully separate, the stream should be here too?
-      // Usually streams are okay in UI for simple cases.
-      // Let's just add to firestore here.
-
       await FirebaseFirestore.instance.collection('universities').add({
         'name': name.trim(),
         'createdAt': FieldValue.serverTimestamp(),

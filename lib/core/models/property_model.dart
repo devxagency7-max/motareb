@@ -35,6 +35,7 @@ class Property {
   final String? gender;
   final List<String> paymentMethods;
   final List<dynamic> universities;
+  final List<dynamic> nearbyPlaces; // Added
   final int bedsCount;
   final int roomsCount;
   final int bathroomsCount; // Added
@@ -90,6 +91,7 @@ class Property {
     this.gender,
     this.paymentMethods = const [],
     this.universities = const [],
+    this.nearbyPlaces = const [],
     this.bedsCount = 0,
     this.roomsCount = 0,
     this.singleRoomsCount = 0,
@@ -159,6 +161,7 @@ class Property {
               .toList() ??
           [],
       universities: (map['universities'] as List<dynamic>?) ?? [],
+      nearbyPlaces: (map['nearbyPlaces'] as List<dynamic>?) ?? [],
       bedsCount: (map['bedsCount'] as num?)?.toInt() ?? 0,
       roomsCount: (map['roomsCount'] as num?)?.toInt() ?? 0,
       singleRoomsCount: (map['singleRoomsCount'] as num?)?.toInt() ?? 0,
@@ -220,6 +223,7 @@ class Property {
       'gender': gender,
       'paymentMethods': paymentMethods,
       'universities': universities,
+      'nearbyPlaces': nearbyPlaces,
       'bedsCount': bedsCount,
       'roomsCount': roomsCount,
       'singleRoomsCount': singleRoomsCount,
