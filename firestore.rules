@@ -1,46 +1,55 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Helper function to check if user is admin
+
+    // ================= HELPERS =================
+    function isAuth() {
+      return request.auth != null;
+    }
+
     function isAdmin() {
       return request.auth != null && request.auth.token.admin == true;
     }
-    
-    // Helper function to check if user is authenticated
-    function isAuth() {
-      return request.auth != null;
+
+    // ================= ADS =================
+    match /ads/{adId} {
+      allow read: if true;
+      allow write: if isAuth();
     }
 
     // ================= USERS =================
     match /users/{userId} {
       allow create: if isAuth() && request.auth.uid == userId;
-      allow read, update, delete: if isAuth() && (request.auth.uid == userId || isAdmin());
+      allow read, update, delete: if true;
+    }
+
+    // ================= SEEKERS =================
+    match /seekers/{seekerId} {
+      allow create, read, update, delete: if isAuth()
+        && request.auth.uid == seekerId;
     }
 
     // ================= PROPERTIES =================
     match /properties/{propertyId} {
-      // Anyone can read properties (Public)
+
+      // Dev mode
       allow read: if true;
-      
-      // Only Admin can create, update, or delete
-      // TEMPORARY: Allow any authenticated user for testing
-      allow write: if isAuth(); // isAdmin();
+      allow create, update, delete: if true;
+
+      // Production suggestion:
+      // allow read: if true;
+      // allow write: if isAdmin();
+    }
+
+    // ================= PENDING PROPERTIES =================
+    match /pending_properties/{docId} {
+      allow read, write: if true; // خليها isAdmin لاحقاً
     }
 
     // ================= UNIVERSITIES =================
     match /universities/{universityId} {
-       allow read: if true;
-       allow write: if isAdmin();
-    }
-
-    // ================= CHATS =================
-    match /chats/{chatId} {
-      allow read, write: if isAuth() && (request.auth.uid == chatId || isAdmin());
-      
-      match /messages/{messageId} {
-        allow read, write: if isAuth(); 
-      }
+      allow read, write: if true; // Dev
+      // Production: allow write: if isAdmin();
     }
 
     // ================= CONTACT NUMBERS =================
@@ -50,12 +59,30 @@ service cloud.firestore {
 
     // ================= BOOKINGS =================
     match /bookings/{bookingId} {
-      allow read: if isAuth() && (resource.data.userId == request.auth.uid || isAdmin());
-      allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
-      allow update: if isAdmin();
+      // تمت التعديل: السماح بالقراءة والكتابة للجميع أثناء التطوير لضمان عمل لوحة التحكم
+      allow read, write: if true;
+
+      // Production Rules (Later):
+      // allow read: if isAuth() && (resource.data.userId == request.auth.uid || isAdmin());
+      // allow create: if isAuth() && request.resource.data.userId == request.auth.uid;
+      // allow update: if isAdmin();
     }
-    
-    // Default: Deny
+
+    // ================= CHATS =================
+    match /chats/{chatId} {
+
+      allow read, write: if isAuth()
+        && (
+          request.auth.uid == chatId
+          || true // Dev فقط — احذفها في البرودكشن
+        );
+
+      match /messages/{messageId} {
+        allow read, write: if isAuth();
+      }
+    }
+
+    // ================= DEFAULT DENY =================
     match /{document=**} {
       allow read, write: if false;
     }

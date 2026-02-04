@@ -7,7 +7,7 @@ import 'admin_all_properties_screen.dart';
 // import 'admin_add_property_screen.dart';
 import '../features/chat/screens/admin_chat_list_screen.dart';
 import 'admin_users_screen.dart';
-import 'admin_reservations_screen.dart';
+import '../features/bookings/screens/admin_bookings_screen.dart';
 import 'admin_universities_screen.dart';
 
 import 'admin_contact_numbers_screen.dart';
@@ -139,7 +139,7 @@ class AdminDashboard extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const AdminReservationsScreen(),
+                          builder: (context) => const AdminBookingsScreen(),
                         ),
                       );
                     },
