@@ -71,9 +71,9 @@ class _AvailableUnitsCardState extends State<AvailableUnitsCard> {
   }
 
   void _recalculatePrices() {
-    // Only recalc for unit mode essentially, as bed mode is simple division on submit (or we can show helper)
-    if (widget.bookingModeNotifier.value != 'unit') {
-      if (mounted) setState(() {}); // Refresh to show bed price calc
+    // In bed mode, we don't need to distribute prices among rooms since each bed has the same price
+    if (widget.bookingModeNotifier.value == 'bed') {
+      if (mounted) setState(() {});
       return;
     }
 
@@ -282,36 +282,12 @@ class _AvailableUnitsCardState extends State<AvailableUnitsCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.blue.withOpacity(0.05),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.blue.withOpacity(0.3)),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.info_outline, color: Colors.blue, size: 20),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  context.loc.bedModeDescription,
-                  style: GoogleFonts.cairo(
-                    fontSize: 12,
-                    color: Colors.blue.shade800,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 15),
         Row(
           children: [
             Expanded(
               child: CustomTextField(
-                label: context.loc.totalBedsCount,
-                hint: '6',
+                label: '',
+                hint: context.loc.totalBedsCount,
                 controller: widget.totalBedsController,
                 keyboardType: TextInputType.number,
                 icon: Icons.bed,
@@ -321,8 +297,8 @@ class _AvailableUnitsCardState extends State<AvailableUnitsCard> {
             const SizedBox(width: 10),
             Expanded(
               child: CustomTextField(
-                label: context.loc.roomsCount,
-                hint: '2',
+                label: '',
+                hint: context.loc.roomsCount,
                 controller: widget.apartmentRoomsCountController,
                 keyboardType: TextInputType.number,
                 icon: Icons.meeting_room,
@@ -341,10 +317,11 @@ class _AvailableUnitsCardState extends State<AvailableUnitsCard> {
         // Helper Calculation Display
         Builder(
           builder: (context) {
-            final totalBeds =
-                int.tryParse(widget.totalBedsController.text) ?? 1;
-            final price = double.tryParse(widget.priceController.text) ?? 0.0;
-            final bedPrice = (totalBeds > 0) ? price / totalBeds : 0.0;
+            final priceText =
+                widget.discountPriceController.text.trim().isNotEmpty
+                ? widget.discountPriceController.text.trim()
+                : widget.priceController.text.trim();
+            final bedPrice = double.tryParse(priceText) ?? 0.0;
 
             return Text(
               '${context.loc.expectedBedPrice} ${bedPrice.toStringAsFixed(0)} ${context.loc.currency}',

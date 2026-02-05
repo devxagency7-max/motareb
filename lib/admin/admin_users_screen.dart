@@ -4,8 +4,22 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:intl/intl.dart';
 
-class AdminUsersScreen extends StatelessWidget {
+class AdminUsersScreen extends StatefulWidget {
   const AdminUsersScreen({super.key});
+
+  @override
+  State<AdminUsersScreen> createState() => _AdminUsersScreenState();
+}
+
+class _AdminUsersScreenState extends State<AdminUsersScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,155 +51,252 @@ class AdminUsersScreen extends StatelessWidget {
         decoration: BoxDecoration(
           color: Theme.of(context).scaffoldBackgroundColor,
         ),
-        child: StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance.collection('users').snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
+        child: Column(
+          children: [
+            // Safe Area + AppBar Spacing
+            SizedBox(
+              height: MediaQuery.of(context).padding.top + kToolbarHeight + 15,
+            ),
 
-            if (snapshot.hasError) {
-              return Center(child: Text('حدث خطأ: ${snapshot.error}'));
-            }
-
-            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return Center(
-                child: Text(
-                  'لا يوجد مستخدمين حالياً',
-                  style: GoogleFonts.cairo(fontSize: 16),
-                ),
-              );
-            }
-
-            final users = snapshot.data!.docs;
-
-            return ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 120, 16, 20),
-              itemCount: users.length,
-              itemBuilder: (context, index) {
-                final userNode = users[index];
-                final user = userNode.data() as Map<String, dynamic>;
-                final userId = userNode.id;
-
-                // Priority: fullName > name > "Anonymous"
-                final displayName =
-                    user['fullName'] ?? user['name'] ?? 'مستخدم بدون اسم';
-                final photoUrl = user['photoUrl'];
-
-                return FadeInUp(
-                  duration: const Duration(milliseconds: 500),
-                  delay: Duration(milliseconds: index * 50),
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).cardTheme.color,
-                      borderRadius: BorderRadius.circular(15),
-                      boxShadow: Theme.of(context).brightness == Brightness.dark
-                          ? []
-                          : [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.04),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                      border: Border.all(
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? const Color(0xFF2F3640)
-                            : Colors.transparent,
+            // Search Bar
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: FadeInDown(
+                duration: const Duration(milliseconds: 400),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardTheme.color,
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
                       ),
+                    ],
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (value) {
+                      setState(() {
+                        _searchQuery = value.trim().toLowerCase();
+                      });
+                    },
+                    style: GoogleFonts.cairo(fontSize: 14),
+                    decoration: InputDecoration(
+                      hintText: 'ابحث بالأسم أو البريد الإلكتروني...',
+                      hintStyle: GoogleFonts.cairo(
+                        fontSize: 13,
+                        color: Colors.grey,
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        color: Color(0xFF008695),
+                      ),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear, size: 20),
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() {
+                                  _searchQuery = '';
+                                });
+                              },
+                            )
+                          : null,
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 15),
                     ),
-                    child: Material(
-                      color: Colors.transparent,
-                      borderRadius: BorderRadius.circular(15),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(15),
-                        onTap: () => _showUserDetails(context, user, userId),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 15,
-                          ),
-                          child: Row(
-                            children: [
-                              // Photo Avatar
-                              Container(
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: const Color(
-                                      0xFF39BB5E,
-                                    ).withOpacity(0.3),
-                                    width: 2,
-                                  ),
-                                ),
-                                child: CircleAvatar(
-                                  radius: 26,
-                                  backgroundColor: Colors.grey.shade100,
-                                  backgroundImage:
-                                      (photoUrl != null &&
-                                          photoUrl.toString().isNotEmpty)
-                                      ? NetworkImage(photoUrl)
-                                      : null,
-                                  child:
-                                      (photoUrl == null ||
-                                          photoUrl.toString().isEmpty)
-                                      ? const Icon(
-                                          Icons.person,
-                                          color: Color(0xFF008695),
-                                        )
-                                      : null,
-                                ),
-                              ),
-                              const SizedBox(width: 15),
+                  ),
+                ),
+              ),
+            ),
 
-                              // Info
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+            const SizedBox(height: 10),
+
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('users')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (snapshot.hasError) {
+                    return Center(child: Text('حدث خطأ: ${snapshot.error}'));
+                  }
+
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'لا يوجد مستخدمين حالياً',
+                        style: GoogleFonts.cairo(fontSize: 16),
+                      ),
+                    );
+                  }
+
+                  final allUsers = snapshot.data!.docs;
+
+                  // Filter users based on search query
+                  final users = allUsers.where((doc) {
+                    final data = doc.data() as Map<String, dynamic>;
+                    final name = (data['fullName'] ?? data['name'] ?? '')
+                        .toString()
+                        .toLowerCase();
+                    final email = (data['email'] ?? '')
+                        .toString()
+                        .toLowerCase();
+
+                    return name.contains(_searchQuery) ||
+                        email.contains(_searchQuery);
+                  }).toList();
+
+                  if (users.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'لا يوجد نتائج لهذا البحث',
+                        style: GoogleFonts.cairo(fontSize: 16),
+                      ),
+                    );
+                  }
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(16, 5, 16, 20),
+                    itemCount: users.length,
+                    itemBuilder: (context, index) {
+                      final userNode = users[index];
+                      final user = userNode.data() as Map<String, dynamic>;
+                      final userId = userNode.id;
+
+                      // Priority: fullName > name > "Anonymous"
+                      final displayName =
+                          user['fullName'] ?? user['name'] ?? 'مستخدم بدون اسم';
+                      final photoUrl = user['photoUrl'];
+
+                      return FadeInUp(
+                        duration: const Duration(milliseconds: 500),
+                        delay: Duration(milliseconds: index * 50),
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).cardTheme.color,
+                            borderRadius: BorderRadius.circular(15),
+                            boxShadow:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? []
+                                : [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.04),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                            border: Border.all(
+                              color:
+                                  Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? const Color(0xFF2F3640)
+                                  : Colors.transparent,
+                            ),
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(15),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(15),
+                              onTap: () =>
+                                  _showUserDetails(context, user, userId),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 15,
+                                ),
+                                child: Row(
                                   children: [
-                                    Text(
-                                      displayName,
-                                      style: GoogleFonts.cairo(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 15,
-                                        color: Theme.of(
-                                          context,
-                                        ).textTheme.bodyLarge?.color,
+                                    // Photo Avatar
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: const Color(
+                                            0xFF39BB5E,
+                                          ).withOpacity(0.3),
+                                          width: 2,
+                                        ),
+                                      ),
+                                      child: CircleAvatar(
+                                        radius: 26,
+                                        backgroundColor: Colors.grey.shade100,
+                                        backgroundImage:
+                                            (photoUrl != null &&
+                                                photoUrl.toString().isNotEmpty)
+                                            ? NetworkImage(photoUrl)
+                                            : null,
+                                        child:
+                                            (photoUrl == null ||
+                                                photoUrl.toString().isEmpty)
+                                            ? const Icon(
+                                                Icons.person,
+                                                color: Color(0xFF008695),
+                                              )
+                                            : null,
                                       ),
                                     ),
-                                    Text(
-                                      user['email'] ?? 'لا يوجد بريد',
-                                      style: GoogleFonts.cairo(
-                                        fontSize: 11,
-                                        color: Colors.grey.shade600,
+                                    const SizedBox(width: 15),
+
+                                    // Info
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            displayName,
+                                            style: GoogleFonts.cairo(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 15,
+                                              color: Theme.of(
+                                                context,
+                                              ).textTheme.bodyLarge?.color,
+                                            ),
+                                          ),
+                                          Text(
+                                            user['email'] ?? 'لا يوجد بريد',
+                                            style: GoogleFonts.cairo(
+                                              fontSize: 11,
+                                              color: Colors.grey.shade600,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
                                       ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                                    ),
+
+                                    // Status Badge
+                                    _buildSimpleBadge(user),
+
+                                    const SizedBox(width: 8),
+                                    const Icon(
+                                      Icons.arrow_forward_ios,
+                                      size: 14,
+                                      color: Colors.grey,
                                     ),
                                   ],
                                 ),
                               ),
-
-                              // Status Badge
-                              _buildSimpleBadge(user),
-
-                              const SizedBox(width: 8),
-                              const Icon(
-                                Icons.arrow_forward_ios,
-                                size: 14,
-                                color: Colors.grey,
-                              ),
-                            ],
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            );
-          },
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );

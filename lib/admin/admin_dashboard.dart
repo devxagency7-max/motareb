@@ -239,14 +239,6 @@ class AdminDashboard extends StatelessWidget {
                       );
                     },
                   ),
-                  _buildDashboardCard(
-                    context,
-                    title: context.loc.settings,
-                    subtitle: context.loc.generalSettings,
-                    icon: Icons.settings_outlined,
-                    color: Colors.grey,
-                    onTap: () {},
-                  ),
 
                   _buildDashboardCard(
                     context,

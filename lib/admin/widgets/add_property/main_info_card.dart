@@ -12,13 +12,9 @@ class MainInfoCard extends StatelessWidget {
   final TextEditingController discountPriceController;
   final TextEditingController locationController;
   final TextEditingController locationEnController;
-  final TextEditingController featuredLabelController;
-  final TextEditingController featuredLabelEnController;
   final ValueNotifier<String> governorateNotifier;
   final ValueNotifier<List<Map<String, dynamic>>> universitiesNotifier;
   final ValueNotifier<List<Map<String, dynamic>>> nearbyPlacesNotifier; // Added
-  final TextEditingController customUniversityController;
-  final TextEditingController customUniversityEnController;
   final TextEditingController customNearbyPlaceController; // Added
   final TextEditingController customNearbyPlaceEnController; // Added
   final TextEditingController depositController; // Added
@@ -32,13 +28,9 @@ class MainInfoCard extends StatelessWidget {
     required this.discountPriceController,
     required this.locationController,
     required this.locationEnController,
-    required this.featuredLabelController,
-    required this.featuredLabelEnController,
     required this.governorateNotifier,
     required this.universitiesNotifier,
     required this.nearbyPlacesNotifier,
-    required this.customUniversityController,
-    required this.customUniversityEnController,
     required this.customNearbyPlaceController,
     required this.customNearbyPlaceEnController,
     required this.depositController,
@@ -223,8 +215,6 @@ class MainInfoCard extends StatelessWidget {
         const SizedBox(height: 15),
         UniversitiesSelectorSection(
           selectedUniversitiesNotifier: universitiesNotifier,
-          customUniversityController: customUniversityController,
-          customUniversityEnController: customUniversityEnController,
         ),
         const SizedBox(height: 15),
         NearbyPlacesSelectorSection(
@@ -233,24 +223,6 @@ class MainInfoCard extends StatelessWidget {
           customPlaceEnController: customNearbyPlaceEnController,
         ),
         const SizedBox(height: 15),
-        CustomTextField(
-          label: 'كلمة مميزة - بادج (بالعربي)',
-          hint: 'مثال: خصم خاص، فرصة، قريب جداً',
-          controller: featuredLabelController,
-          icon: Icons.stars_rounded,
-          maxLines: null,
-          minLines: 1,
-        ),
-        const SizedBox(height: 10),
-        CustomTextField(
-          label: 'Featured Label (English)',
-          hint: 'e.g. Special Offer, Close to Uni',
-          controller: featuredLabelEnController,
-          icon: Icons.stars_rounded,
-          textDirection: TextDirection.ltr,
-          maxLines: null,
-          minLines: 1,
-        ),
         const SizedBox(height: 20),
         const Divider(),
         ValueListenableBuilder<bool>(

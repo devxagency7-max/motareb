@@ -823,6 +823,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Paste Google Maps link here (optional)'**
   String get enterGoogleMapLink;
+
+  /// No description provided for @bookingDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking Details'**
+  String get bookingDetails;
+
+  /// No description provided for @propertyInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Property Info'**
+  String get propertyInfo;
+
+  /// No description provided for @bookingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking Status'**
+  String get bookingStatus;
+
+  /// No description provided for @customerInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer Info'**
+  String get customerInfo;
+
+  /// No description provided for @financialDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Financial Details'**
+  String get financialDetails;
+
+  /// No description provided for @depositPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Deposit Paid'**
+  String get depositPaid;
+
+  /// No description provided for @remainingAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining Amount'**
+  String get remainingAmount;
+
+  /// No description provided for @totalAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Amount'**
+  String get totalAmount;
+
+  /// No description provided for @selectedItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected Items'**
+  String get selectedItems;
+
+  /// No description provided for @idVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'ID Verification Images'**
+  String get idVerification;
+
+  /// No description provided for @idFront.
+  ///
+  /// In en, this message translates to:
+  /// **'ID Card (Front)'**
+  String get idFront;
+
+  /// No description provided for @idBack.
+  ///
+  /// In en, this message translates to:
+  /// **'ID Card (Back)'**
+  String get idBack;
+
+  /// No description provided for @noIdProvided.
+  ///
+  /// In en, this message translates to:
+  /// **'No ID image provided'**
+  String get noIdProvided;
+
+  /// No description provided for @currentStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Status'**
+  String get currentStatus;
+
+  /// No description provided for @reserved.
+  ///
+  /// In en, this message translates to:
+  /// **'Reserved'**
+  String get reserved;
+
+  /// No description provided for @completed.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get completed;
+
+  /// No description provided for @userId.
+  ///
+  /// In en, this message translates to:
+  /// **'User ID'**
+  String get userId;
+
+  /// No description provided for @propertyId.
+  ///
+  /// In en, this message translates to:
+  /// **'Property ID'**
+  String get propertyId;
 }
 
 class _AppLocalizationsDelegate

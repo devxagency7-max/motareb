@@ -377,4 +377,58 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enterGoogleMapLink => 'Paste Google Maps link here (optional)';
+
+  @override
+  String get bookingDetails => 'Booking Details';
+
+  @override
+  String get propertyInfo => 'Property Info';
+
+  @override
+  String get bookingStatus => 'Booking Status';
+
+  @override
+  String get customerInfo => 'Customer Info';
+
+  @override
+  String get financialDetails => 'Financial Details';
+
+  @override
+  String get depositPaid => 'Deposit Paid';
+
+  @override
+  String get remainingAmount => 'Remaining Amount';
+
+  @override
+  String get totalAmount => 'Total Amount';
+
+  @override
+  String get selectedItems => 'Selected Items';
+
+  @override
+  String get idVerification => 'ID Verification Images';
+
+  @override
+  String get idFront => 'ID Card (Front)';
+
+  @override
+  String get idBack => 'ID Card (Back)';
+
+  @override
+  String get noIdProvided => 'No ID image provided';
+
+  @override
+  String get currentStatus => 'Current Status';
+
+  @override
+  String get reserved => 'Reserved';
+
+  @override
+  String get completed => 'Completed';
+
+  @override
+  String get userId => 'User ID';
+
+  @override
+  String get propertyId => 'Property ID';
 }

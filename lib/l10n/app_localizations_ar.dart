@@ -374,4 +374,58 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get enterGoogleMapLink => 'ضع رابط خرائط جوجل هنا (اختياري)';
+
+  @override
+  String get bookingDetails => 'تفاصيل الحجز';
+
+  @override
+  String get propertyInfo => 'معلومات العقار';
+
+  @override
+  String get bookingStatus => 'حالة الحجز';
+
+  @override
+  String get customerInfo => 'بيانات العميل';
+
+  @override
+  String get financialDetails => 'التفاصيل المالية';
+
+  @override
+  String get depositPaid => 'العربون المدفوع';
+
+  @override
+  String get remainingAmount => 'المبلغ المتبقي';
+
+  @override
+  String get totalAmount => 'إجمالي المبلغ';
+
+  @override
+  String get selectedItems => 'البنود المختارة';
+
+  @override
+  String get idVerification => 'صور إثبات الشخصية';
+
+  @override
+  String get idFront => 'صورة البطاقة (وجه)';
+
+  @override
+  String get idBack => 'صورة البطاقة (ظهر)';
+
+  @override
+  String get noIdProvided => 'لم يتم توفير صورة البطاقة';
+
+  @override
+  String get currentStatus => 'الحالة الحالية';
+
+  @override
+  String get reserved => 'محجوز';
+
+  @override
+  String get completed => 'مكتمل';
+
+  @override
+  String get userId => 'رقم المستخدم';
+
+  @override
+  String get propertyId => 'رقم العقار';
 }

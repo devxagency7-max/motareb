@@ -1,20 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:admin_motareb/utils/custom_snackbar.dart';
 import 'package:admin_motareb/core/utils/loc_extension.dart';
 import 'add_property_helpers.dart';
 
 class UniversitiesSelectorSection extends StatelessWidget {
   final ValueNotifier<List<Map<String, dynamic>>> selectedUniversitiesNotifier;
-  final TextEditingController customUniversityController;
-  final TextEditingController customUniversityEnController;
-
   const UniversitiesSelectorSection({
     super.key,
     required this.selectedUniversitiesNotifier,
-    required this.customUniversityController,
-    required this.customUniversityEnController,
   });
 
   @override
@@ -101,59 +95,6 @@ class UniversitiesSelectorSection extends StatelessWidget {
                       );
                     }).toList(),
                   ),
-                const SizedBox(height: 15),
-                BilingualAddField(
-                  arController: customUniversityController,
-                  enController: customUniversityEnController,
-                  arHint:
-                      context.loc.addCustomUniversity, // localized or default
-                  enHint: "University Name (EN)",
-                  onAdd: (ar, en) async {
-                    final trimmedAr = ar.trim();
-                    final trimmedEn = en.trim().isEmpty ? ar.trim() : en.trim();
-
-                    if (trimmedAr.isNotEmpty) {
-                      final newUni = {'ar': trimmedAr, 'en': trimmedEn};
-                      final list = List<Map<String, dynamic>>.from(
-                        selectedUniversitiesNotifier.value,
-                      );
-
-                      if (!list.any((u) => u['ar'] == trimmedAr)) {
-                        list.add(newUni);
-                        selectedUniversitiesNotifier.value = list;
-
-                        // ALSO save to global universities collection
-                        try {
-                          await FirebaseFirestore.instance
-                              .collection('universities')
-                              .add({
-                                'name': trimmedAr,
-                                'nameEn': trimmedEn,
-                                'createdAt': FieldValue.serverTimestamp(),
-                              });
-                        } catch (e) {
-                          debugPrint("Error saving university globally: $e");
-                        }
-
-                        if (context.mounted) {
-                          CustomSnackBar.show(
-                            context: context,
-                            message: context.loc.universityAdded,
-                            isError: false,
-                          );
-                        }
-                      } else {
-                        if (context.mounted) {
-                          CustomSnackBar.show(
-                            context: context,
-                            message: context.loc.universityAlreadyAdded,
-                            isError: true,
-                          );
-                        }
-                      }
-                    }
-                  },
-                ),
               ],
             );
           },

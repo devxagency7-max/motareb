@@ -41,8 +41,6 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
   final _bathroomsController = TextEditingController(text: '1');
   final ValueNotifier<List<Map<String, dynamic>>> _roomsNotifier =
       ValueNotifier([]);
-  final _featuredLabelController = TextEditingController();
-  final _featuredLabelEnController = TextEditingController(); // NEW
 
   final _customRuleController = TextEditingController();
   final _customRuleEnController = TextEditingController();
@@ -164,8 +162,6 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
     if (p.rooms.isNotEmpty) {
       _roomsNotifier.value = List.from(p.rooms);
     }
-    _featuredLabelController.text = p.featuredLabel ?? '';
-    _featuredLabelEnController.text = p.featuredLabelEn ?? '';
 
     _imagesNotifier.value = List<String>.from(p.images);
     _videoUrlNotifier.value = p.videoUrl;
@@ -233,8 +229,6 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
     _descriptionEnController.dispose();
     _bathroomsController.dispose();
     _roomsNotifier.dispose();
-    _featuredLabelController.dispose();
-    _featuredLabelEnController.dispose();
     _customRuleController.dispose();
     _customRuleEnController.dispose();
     _customAmenityController.dispose();
@@ -345,10 +339,6 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
         'descriptionEn': _descriptionEnController.text.trim().isEmpty
             ? _descriptionController.text.trim()
             : _descriptionEnController.text.trim(),
-        'featuredLabel': _featuredLabelController.text.trim(),
-        'featuredLabelEn': _featuredLabelEnController.text.trim().isEmpty
-            ? _featuredLabelController.text.trim()
-            : _featuredLabelEnController.text.trim(),
         'images': _imagesNotifier.value,
         'videoUrl': _videoUrlNotifier.value,
         'amenities': _amenitiesNotifier.value,
@@ -387,8 +377,9 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
         'apartmentRoomsCount':
             int.tryParse(_apartmentRoomsCountController.text.trim()) ?? 0,
         'bedPrice': (_bookingModeNotifier.value == 'bed')
-            ? (double.tryParse(_priceController.text.trim()) ?? 0.0) /
-                  (int.tryParse(_totalBedsController.text.trim()) ?? 1)
+            ? (double.tryParse(_discountPriceController.text.trim()) ??
+                  double.tryParse(_priceController.text.trim()) ??
+                  0.0)
             : 0.0,
         'generalRoomType': _roomTypeController.text.trim(),
         'bookingEnabled': _bookingEnabledNotifier.value,
@@ -620,13 +611,9 @@ class _AdminAddPropertyScreenState extends State<AdminAddPropertyScreen> {
                 discountPriceController: _discountPriceController,
                 locationController: _locationController,
                 locationEnController: _locationEnController,
-                featuredLabelController: _featuredLabelController,
-                featuredLabelEnController: _featuredLabelEnController,
                 governorateNotifier: _selectedGovernorateNotifier,
                 universitiesNotifier: _selectedUniversitiesNotifier,
                 nearbyPlacesNotifier: _selectedNearbyPlacesNotifier, // NEW
-                customUniversityController: _customUniversityController,
-                customUniversityEnController: _customUniversityEnController,
                 customNearbyPlaceController:
                     _customNearbyPlaceController, // NEW
                 customNearbyPlaceEnController:
